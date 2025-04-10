@@ -3,15 +3,16 @@ package um.prog2.usuario;
 public class Usuario {
     private String nombre;
     private String apellido;
-    private String ID;
+    private int ID;
     private String email;
 
-    public Usuario(String nombre, String apellido, String ID, String email) {
+    public Usuario(String nombre, String apellido, int ID, String email) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.ID = ID;
         this.email = email;
     }
+
     public String getNombre() {
         return nombre;
     }
@@ -24,10 +25,10 @@ public class Usuario {
     public void setApellido(String apellido) {
         this.apellido = apellido;
     }
-    public String getID() {
+    public int getID() {
         return ID;
     }
-    public void setID(String ID) {
+    public void setID(int ID) {
         this.ID = ID;
     }
     public String getEmail() {
