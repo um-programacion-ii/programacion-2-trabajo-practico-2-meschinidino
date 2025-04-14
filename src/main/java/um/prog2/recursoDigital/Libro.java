@@ -53,4 +53,14 @@ public class Libro implements RecursoDigital {
     public void setIdentificador(String identificador) {
         this.identificador = identificador;
     }
+
+    @Override
+    public String toString() {
+        return "Libro{" +
+                "identificador='" + identificador + '\'' +
+                ", titulo='" + titulo + '\'' +
+                ", autor='" + autor + '\'' +
+                ", estado=" + estado +
+                '}';
+    }
 }

@@ -96,4 +96,18 @@ public class AudioLibro implements RecursoDigital {
     public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
+
+    @Override
+    public String toString() {
+        return "AudioLibro{" +
+                "identificador='" + identificador + '\'' +
+                ", titulo='" + titulo + '\'' +
+                ", autor='" + autor + '\'' +
+                ", narrador='" + narrador + '\'' +
+                ", duracion=" + duracion +
+                ", idioma='" + idioma + '\'' +
+                ", isbn='" + isbn + '\'' +
+                ", estado=" + estado +
+                '}';
+    }
 }
