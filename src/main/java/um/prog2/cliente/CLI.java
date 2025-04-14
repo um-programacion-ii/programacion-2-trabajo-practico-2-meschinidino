@@ -75,8 +75,9 @@ public class CLI {
         System.out.println("2. Crear audiolibro");
         System.out.println("3. Crear revista");
         System.out.println("4. Ver todos los recursos");
-        System.out.println("5. Cambiar estado de un recurso");
-        System.out.println("6. Volver al menú principal");
+        System.out.println("5. Ver detalles de un recurso");
+        System.out.println("6. Cambiar estado de un recurso");
+        System.out.println("7. Volver al menú principal");
         mostrarSeparador();
         System.out.print("Seleccione una opción: ");
         String opcion = scanner.nextLine();
@@ -95,13 +96,54 @@ public class CLI {
                 mostrarRecursos();
                 break;
             case "5":
-                cambiarEstadoRecurso();
+                verDetallesRecurso();
                 break;
             case "6":
+                cambiarEstadoRecurso();
+                break;
+            case "7":
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
         }
+    }
+
+    private static void verDetallesRecurso() {
+        mostrarSeparador();
+        System.out.println("DETALLES DE RECURSO");
+        mostrarSeparador();
+
+        if (recursos.isEmpty()) {
+            System.out.println("No hay recursos registrados.");
+            return;
+        }
+
+        // Show simplified list of resources
+        for (int i = 0; i < recursos.size(); i++) {
+            RecursoDigital recurso = recursos.get(i);
+            System.out.println("[" + i + "] ID: " + recurso.getIdentificador() +
+                    ", Tipo: " + recurso.getClass().getSimpleName());
+        }
+
+        int index = -1;
+        try {
+            System.out.print("\nSeleccione el número del recurso para ver detalles: ");
+            index = Integer.parseInt(scanner.nextLine());
+
+            if (index < 0 || index >= recursos.size()) {
+                System.out.println("Índice inválido.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: El índice debe ser un número entero.");
+            return;
+        }
+
+        // Show full details using toString
+        mostrarSeparador();
+        System.out.println("DETALLE COMPLETO:");
+        System.out.println(recursos.get(index).toString());
+        mostrarSeparador();
     }
 
     private static void crearUsuario() {
@@ -275,9 +317,7 @@ public class CLI {
         } else {
             for (int i = 0; i < recursos.size(); i++) {
                 RecursoDigital recurso = recursos.get(i);
-                System.out.println("[" + i + "] ID: " + recurso.getIdentificador() +
-                        ", Tipo: " + recurso.getClass().getSimpleName() +
-                        ", Estado: " + recurso.getEstado());
+                System.out.println("[" + i + "] " + recurso.toString());
             }
         }
     }

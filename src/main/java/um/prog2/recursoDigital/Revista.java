@@ -94,4 +94,18 @@ public class Revista implements RecursoDigital{
     public void setIdentificador(String identificador) {
         this.identificador = identificador;
     }
+
+    @Override
+    public String toString() {
+        return "Revista{" +
+                "identificador='" + identificador + '\'' +
+                ", titulo='" + titulo + '\'' +
+                ", editorial='" + editorial + '\'' +
+                ", categoria='" + categoria + '\'' +
+                ", fechaPublicacion='" + fechaPublicacion + '\'' +
+                ", issn='" + issn + '\'' +
+                ", numeroPaginas=" + numeroPaginas +
+                ", estado=" + estado +
+                '}';
+    }
 }
