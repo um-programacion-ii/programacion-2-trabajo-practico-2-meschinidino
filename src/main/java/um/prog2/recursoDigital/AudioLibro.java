@@ -1,6 +1,6 @@
 package um.prog2.recursoDigital;
 
-public class AudioLibro implements RecursoDigital {
+public class AudioLibro extends RecursoBase {
     private String identificador;
     private String titulo;
     private String autor;
@@ -8,7 +8,6 @@ public class AudioLibro implements RecursoDigital {
     private double duracion;
     private String idioma;
     private String isbn;
-    private EstadoRecurso estado;
 
     public AudioLibro() {
     }
@@ -35,19 +34,6 @@ public class AudioLibro implements RecursoDigital {
         this.identificador = identificador;
     }
 
-    @Override
-    public EstadoRecurso getEstado() {
-        return estado;
-    }
-
-    @Override
-    public void actualizarEstado(EstadoRecurso estado) {
-        this.estado = estado;
-    }
-
-    public void setEstado(EstadoRecurso estado) {
-        this.estado = estado;
-    }
 
     public String getTitulo() {
         return titulo;

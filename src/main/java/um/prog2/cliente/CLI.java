@@ -376,6 +376,7 @@ public class CLI {
         System.out.println("Estado actualizado exitosamente.");
     }
 
+
     private static void mostrarSeparador() {
         System.out.println("------------------------------------------------");
     }
