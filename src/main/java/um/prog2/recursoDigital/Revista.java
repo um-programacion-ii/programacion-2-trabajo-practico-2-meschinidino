@@ -1,6 +1,6 @@
 package um.prog2.recursoDigital;
 
-public class Revista implements RecursoDigital{
+public class Revista extends RecursoBase {
     private String identificador;
     private String titulo;
     private String editorial;
@@ -8,14 +8,8 @@ public class Revista implements RecursoDigital{
     private String fechaPublicacion;
     private String issn;
     private int numeroPaginas;
-    private EstadoRecurso estado;
 
-    public void actualizarEstado(EstadoRecurso estado) {
-        this.estado = estado;
-    }
-
-    public Revista(){
-
+    public Revista() {
     }
 
     public Revista(EstadoRecurso estado, int numeroPaginas, String issn, String fechaPublicacion, String categoria, String editorial, String titulo, String identificador) {
@@ -29,14 +23,6 @@ public class Revista implements RecursoDigital{
         this.identificador = identificador;
     }
 
-    @Override
-    public EstadoRecurso getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoRecurso estado) {
-        this.estado = estado;
-    }
 
     public int getNumeroPaginas() {
         return numeroPaginas;

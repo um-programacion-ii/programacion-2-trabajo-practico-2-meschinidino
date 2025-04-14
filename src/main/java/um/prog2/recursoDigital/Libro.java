@@ -1,14 +1,11 @@
 package um.prog2.recursoDigital;
 
-public class Libro implements RecursoDigital {
+public class Libro extends RecursoBase {
     private String identificador;
     private String titulo;
     private String autor;
-    private EstadoRecurso estado;
 
-    public void actualizarEstado(EstadoRecurso estado) {
-        this.estado = estado;
-    }
+
 
     public Libro(EstadoRecurso estado, String autor, String titulo, String identificador) {
         this.estado = estado;
@@ -18,15 +15,6 @@ public class Libro implements RecursoDigital {
     }
 
     public Libro() {
-    }
-
-    @Override
-    public EstadoRecurso getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoRecurso estado) {
-        this.estado = estado;
     }
 
     public String getAutor() {
