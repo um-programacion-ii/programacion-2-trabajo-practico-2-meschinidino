@@ -14,6 +14,21 @@ public class Revista implements RecursoDigital{
         this.estado = estado;
     }
 
+    public Revista(){
+
+    }
+
+    public Revista(EstadoRecurso estado, int numeroPaginas, String issn, String fechaPublicacion, String categoria, String editorial, String titulo, String identificador) {
+        this.estado = estado;
+        this.numeroPaginas = numeroPaginas;
+        this.issn = issn;
+        this.fechaPublicacion = fechaPublicacion;
+        this.categoria = categoria;
+        this.editorial = editorial;
+        this.titulo = titulo;
+        this.identificador = identificador;
+    }
+
     @Override
     public EstadoRecurso getEstado() {
         return estado;

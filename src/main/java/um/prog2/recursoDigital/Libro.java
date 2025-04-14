@@ -10,6 +10,16 @@ public class Libro implements RecursoDigital {
         this.estado = estado;
     }
 
+    public Libro(EstadoRecurso estado, String autor, String titulo, String identificador) {
+        this.estado = estado;
+        this.autor = autor;
+        this.titulo = titulo;
+        this.identificador = identificador;
+    }
+
+    public Libro() {
+    }
+
     @Override
     public EstadoRecurso getEstado() {
         return estado;
