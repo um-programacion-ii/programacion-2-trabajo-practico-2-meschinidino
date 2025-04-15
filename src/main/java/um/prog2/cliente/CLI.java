@@ -77,7 +77,9 @@ public class CLI {
         System.out.println("4. Ver todos los recursos");
         System.out.println("5. Ver detalles de un recurso");
         System.out.println("6. Cambiar estado de un recurso");
-        System.out.println("7. Volver al menú principal");
+        System.out.println("7. Prestar un recurso");
+        System.out.println("8. Renovar un recurso");
+        System.out.println("9. Volver al menú principal");
         mostrarSeparador();
         System.out.print("Seleccione una opción: ");
         String opcion = scanner.nextLine();
@@ -102,10 +104,131 @@ public class CLI {
                 cambiarEstadoRecurso();
                 break;
             case "7":
+                prestarRecurso();
+                break;
+            case "8":
+                renovarRecurso();
+                break;
+            case "9":
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
         }
+    }
+
+    private static void prestarRecurso() {
+        mostrarSeparador();
+        System.out.println("PRESTAR RECURSO");
+        mostrarSeparador();
+
+        // Check if there's a user
+        if (usuario == null) {
+            System.out.println("Error: Debe crear un usuario antes de prestar un recurso.");
+            return;
+        }
+
+        if (recursos.isEmpty()) {
+            System.out.println("No hay recursos registrados.");
+            return;
+        }
+
+        // List only prestable resources
+        System.out.println("Recursos que pueden ser prestados:");
+        List<RecursoDigital> prestables = new ArrayList<>();
+
+        for (RecursoDigital recurso : recursos) {
+            if (recurso instanceof Prestable) {
+                prestables.add(recurso);
+                System.out.println("[" + (prestables.size() - 1) + "] ID: " + recurso.getIdentificador() +
+                        ", Tipo: " + recurso.getClass().getSimpleName() +
+                        ", Estado: " + recurso.getEstado());
+            }
+        }
+
+        if (prestables.isEmpty()) {
+            System.out.println("No hay recursos que puedan ser prestados.");
+            return;
+        }
+
+        int index = -1;
+        try {
+            System.out.print("\nSeleccione el número del recurso para prestar: ");
+            index = Integer.parseInt(scanner.nextLine());
+
+            if (index < 0 || index >= prestables.size()) {
+                System.out.println("Índice inválido.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: El índice debe ser un número entero.");
+            return;
+        }
+
+        RecursoDigital recursoSeleccionado = prestables.get(index);
+        Prestable prestable = (Prestable) recursoSeleccionado;
+
+        if (!prestable.estaDisponible()) {
+            System.out.println("Este recurso no está disponible para préstamo.");
+            return;
+        }
+
+        prestable.prestar(usuario);
+        System.out.println("Recurso prestado exitosamente hasta: " + prestable.getFechaDevolucion());
+    }
+
+    private static void renovarRecurso() {
+        mostrarSeparador();
+        System.out.println("RENOVAR RECURSO");
+        mostrarSeparador();
+
+        // Check if there's a user
+        if (usuario == null) {
+            System.out.println("Error: Debe crear un usuario antes de renovar un recurso.");
+            return;
+        }
+
+        if (recursos.isEmpty()) {
+            System.out.println("No hay recursos registrados.");
+            return;
+        }
+
+        // List only renewable resources that are currently loaned
+        System.out.println("Recursos que pueden ser renovados:");
+        List<RecursoDigital> renovables = new ArrayList<>();
+
+        for (int i = 0; i < recursos.size(); i++) {
+            RecursoDigital recurso = recursos.get(i);
+            if (recurso instanceof Renovable && recurso.getEstado() == EstadoRecurso.PRESTADO) {
+                renovables.add(recurso);
+                System.out.println("[" + (renovables.size() - 1) + "] ID: " + recurso.getIdentificador() +
+                        ", Tipo: " + recurso.getClass().getSimpleName());
+            }
+        }
+
+        if (renovables.isEmpty()) {
+            System.out.println("No hay recursos que puedan ser renovados.");
+            return;
+        }
+
+        int index = -1;
+        try {
+            System.out.print("\nSeleccione el número del recurso para renovar: ");
+            index = Integer.parseInt(scanner.nextLine());
+
+            if (index < 0 || index >= renovables.size()) {
+                System.out.println("Índice inválido.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: El índice debe ser un número entero.");
+            return;
+        }
+
+        RecursoDigital recursoSeleccionado = renovables.get(index);
+        Renovable renovable = (Renovable) recursoSeleccionado;
+
+        renovable.renovar();
+        System.out.println("Recurso renovado exitosamente hasta: " + renovable.getFechaDevolucion());
     }
 
     private static void verDetallesRecurso() {
