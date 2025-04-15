@@ -1,6 +1,9 @@
 package um.prog2.recursoDigital;
 
-public class Revista extends RecursoBase {
+import um.prog2.usuario.Usuario;
+import java.time.LocalDateTime;
+
+public class Revista extends RecursoBase implements Prestable {
     private String identificador;
     private String titulo;
     private String editorial;
@@ -8,6 +11,8 @@ public class Revista extends RecursoBase {
     private String fechaPublicacion;
     private String issn;
     private int numeroPaginas;
+    private LocalDateTime fechaDevolucion;
+    private Usuario usuarioPrestamo;
 
     public Revista() {
     }
@@ -23,6 +28,25 @@ public class Revista extends RecursoBase {
         this.identificador = identificador;
     }
 
+    // Implement Prestable methods
+    @Override
+    public boolean estaDisponible() {
+        return this.getEstado() == EstadoRecurso.DISPONIBLE;
+    }
+
+    @Override
+    public LocalDateTime getFechaDevolucion() {
+        return fechaDevolucion;
+    }
+
+    @Override
+    public void prestar(Usuario usuario) {
+        if (estaDisponible()) {
+            this.setEstado(EstadoRecurso.PRESTADO);
+            this.usuarioPrestamo = usuario;
+            this.fechaDevolucion = LocalDateTime.now().plusDays(7); // Shorter loan period for magazines
+        }
+    }
 
     public int getNumeroPaginas() {
         return numeroPaginas;
