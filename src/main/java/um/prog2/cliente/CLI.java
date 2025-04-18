@@ -292,7 +292,10 @@ public class CLI {
         System.out.print("Ingrese el email del usuario: ");
         String email = scanner.nextLine();
 
-        usuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email);
+        System.out.println("Ingrese el numero de telefono del usuario: ");
+        int telefono = scanner.nextInt();
+
+        usuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email, telefono);
         System.out.println("Usuario creado exitosamente: " + usuario);
     }
 
