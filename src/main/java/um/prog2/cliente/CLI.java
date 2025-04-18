@@ -7,13 +7,12 @@ import um.prog2.recursoDigital.*;
 import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class CLI {
     private static final Scanner scanner = new Scanner(System.in);
-    private static Usuario usuario = null;
+    private static final Map<String, Usuario> usuarios = new HashMap<>();
+    private static Usuario usuarioActual = null;
     private static final List<RecursoDigital> recursos = new ArrayList<>();
     private static final ServicioNotificaciones servicioEmail = new ServicioNotificacionesEmail();
     private static final ServicioNotificaciones servicioSMS = new ServicioNotificacionesSMS();
@@ -54,7 +53,8 @@ public class CLI {
         mostrarSeparador();
         System.out.println("1. Crear usuario");
         System.out.println("2. Ver usuarios");
-        System.out.println("3. Volver al menú principal");
+        System.out.println("3. Seleccionar usuario");
+        System.out.println("4. Volver al menú principal");
         mostrarSeparador();
         System.out.print("Seleccione una opción: ");
         String opcion = scanner.nextLine();
@@ -67,6 +67,9 @@ public class CLI {
                 mostrarUsuarios();
                 break;
             case "3":
+                seleccionarUsuario();
+                break;
+            case "4":
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
@@ -128,7 +131,7 @@ public class CLI {
         mostrarSeparador();
 
         // Check if there's a user
-        if (usuario == null) {
+        if (usuarioActual == null) {
             System.out.println("Error: Debe crear un usuario antes de prestar un recurso.");
             return;
         }
@@ -178,14 +181,14 @@ public class CLI {
             return;
         }
 
-        prestable.prestar(usuario);
+        prestable.prestar(usuarioActual);
 
-        if (servicioPreferido != null && usuario != null) {
+        if (servicioPreferido != null && usuarioActual != null) {
             servicioPreferido.enviarNotificacion(
                     "Has tomado prestado recurso ID: " + recursoSeleccionado.getIdentificador() +
                             " (" + recursoSeleccionado.getClass().getSimpleName() + ")" +
                             ". Fecha de devolución: " + prestable.getFechaDevolucion(),
-                    usuario
+                    usuarioActual
             );
         }
 
@@ -198,7 +201,7 @@ public class CLI {
         mostrarSeparador();
 
         // Check if there's a user
-        if (usuario == null) {
+        if (usuarioActual == null) {
             System.out.println("Error: Debe crear un usuario antes de renovar un recurso.");
             return;
         }
@@ -244,12 +247,12 @@ public class CLI {
         Renovable renovable = (Renovable) recursoSeleccionado;
 
         renovable.renovar();
-        if (servicioPreferido != null && usuario != null) {
+        if (servicioPreferido != null && usuarioActual != null) {
             servicioPreferido.enviarNotificacion(
                     "Has renovado recurso ID: " + recursoSeleccionado.getIdentificador() +
                             " (" + recursoSeleccionado.getClass().getSimpleName() + ")" +
                             ". Nueva fecha de devolución: " + renovable.getFechaDevolucion(),
-                    usuario
+                    usuarioActual
             );
         }
 
@@ -326,8 +329,10 @@ public class CLI {
             return;
         }
 
-        // Create user first
-        usuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email, telefono);
+        // Create user and add to map
+        Usuario nuevoUsuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email, telefono);
+        usuarios.put(String.valueOf(ID), nuevoUsuario);
+        usuarioActual = nuevoUsuario; // Set as current user
 
         // Ask for notification preference with validation
         boolean validOption = false;
@@ -352,8 +357,8 @@ public class CLI {
             }
         }
 
-        servicioPreferido.enviarNotificacion("Bienvenido al sistema de biblioteca digital!", usuario);
-        System.out.println("Usuario creado exitosamente: " + usuario);
+        servicioPreferido.enviarNotificacion("Bienvenido al sistema de biblioteca digital!", usuarioActual);
+        System.out.println("Usuario creado exitosamente: " + nuevoUsuario);
     }
 
     private static void mostrarUsuarios() {
@@ -361,10 +366,44 @@ public class CLI {
         System.out.println("USUARIOS REGISTRADOS");
         mostrarSeparador();
 
-        if (usuario == null) {
-            System.out.println("No hay ningún usuario registrado.");
+        if (usuarios.isEmpty()) {
+            System.out.println("No hay usuarios registrados.");
         } else {
-            System.out.println("Usuario: " + usuario);
+            for (Usuario usuario : usuarios.values()) {
+                System.out.println("ID: " + usuario.getID() + " - " + usuario);
+            }
+
+            if (usuarioActual != null) {
+                System.out.println("\nUsuario actual: " + usuarioActual);
+            } else {
+                System.out.println("\nNo hay usuario seleccionado.");
+            }
+        }
+    }
+
+    private static void seleccionarUsuario() {
+        mostrarSeparador();
+        System.out.println("SELECCIONAR USUARIO");
+        mostrarSeparador();
+
+        if (usuarios.isEmpty()) {
+            System.out.println("No hay usuarios registrados.");
+            return;
+        }
+
+        System.out.println("Usuarios disponibles:");
+        for (Usuario usuario : usuarios.values()) {
+            System.out.println("ID: " + usuario.getID() + " - " + usuario.getNombre() + " " + usuario.getApellido());
+        }
+
+        System.out.print("\nIngrese el ID del usuario a seleccionar: ");
+        String userID = scanner.nextLine();
+
+        if (usuarios.containsKey(userID)) {
+            usuarioActual = usuarios.get(userID);
+            System.out.println("Usuario seleccionado: " + usuarioActual);
+        } else {
+            System.out.println("No se encontró un usuario con ese ID.");
         }
     }
 
