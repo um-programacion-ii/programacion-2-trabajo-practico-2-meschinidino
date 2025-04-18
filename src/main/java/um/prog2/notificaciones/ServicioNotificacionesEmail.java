@@ -1,4 +1,5 @@
 package um.prog2.notificaciones;
+import um.prog2.interfaces.ServicioNotificaciones;
 import um.prog2.usuario.Usuario;
 
 public class ServicioNotificacionesEmail implements ServicioNotificaciones {

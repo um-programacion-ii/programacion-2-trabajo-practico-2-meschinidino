@@ -1,4 +1,4 @@
-package um.prog2.recursoDigital;
+package um.prog2.interfaces;
 
 import um.prog2.usuario.Usuario;
 

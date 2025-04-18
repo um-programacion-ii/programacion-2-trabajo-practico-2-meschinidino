@@ -1,0 +1,29 @@
+package um.prog2.Enums;
+
+public enum CategoriaRecurso {
+    CIENCIA_FICCION,
+    FANTASIA,
+    MISTERIO,
+    ROMANCE,
+    THRILLER,
+    TERROR,
+    BIOGRAFIA,
+    HISTORIA,
+    AUTOAYUDA,
+    POESIA,
+    AVENTURA,
+    DRAMA,
+    COMEDIA,
+    NO_FICCION,
+    LITERATURA_INFANTIL,
+    CIENCIA,
+    TECNOLOGIA,
+    FILOSOFIA,
+    ARTE,
+    POLITICA,
+    ECONOMIA,
+    COCINA,
+    VIAJES,
+    DEPORTES,
+    REALISMO_MAGICO
+}

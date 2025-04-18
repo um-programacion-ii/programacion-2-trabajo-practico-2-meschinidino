@@ -1,5 +1,8 @@
 package um.prog2.recursoDigital;
 
+import um.prog2.Enums.CategoriaRecurso;
+import um.prog2.Enums.EstadoRecurso;
+import um.prog2.interfaces.Renovable;
 import um.prog2.usuario.Usuario;
 import java.time.LocalDateTime;
 
@@ -11,14 +14,17 @@ public class AudioLibro extends RecursoBase implements Renovable {
     private double duracion;
     private String idioma;
     private String isbn;
+    private CategoriaRecurso categoria; // Changed from String genero to CategoriaRecurso
     private LocalDateTime fechaDevolucion;
     private Usuario usuarioPrestamo;
 
     public AudioLibro() {
+        this.categoria = CategoriaRecurso.NO_FICCION; // Default category
     }
 
+    // Updated constructor with CategoriaRecurso
     public AudioLibro(String identificador, String titulo, String autor, String narrador,
-                      double duracion, String idioma, String isbn,
+                      double duracion, String idioma, String isbn, CategoriaRecurso categoria,
                       EstadoRecurso estado) {
         this.identificador = identificador;
         this.titulo = titulo;
@@ -27,10 +33,60 @@ public class AudioLibro extends RecursoBase implements Renovable {
         this.duracion = duracion;
         this.idioma = idioma;
         this.isbn = isbn;
+        this.categoria = categoria;
         this.estado = estado;
     }
 
-    // Implementation of Prestable methods
+    // Constructor with String categoria for backward compatibility
+    public AudioLibro(String identificador, String titulo, String autor, String narrador,
+                      double duracion, String idioma, String isbn, String categoriaStr,
+                      EstadoRecurso estado) {
+        this.identificador = identificador;
+        this.titulo = titulo;
+        this.autor = autor;
+        this.narrador = narrador;
+        this.duracion = duracion;
+        this.idioma = idioma;
+        this.isbn = isbn;
+        try {
+            this.categoria = CategoriaRecurso.valueOf(categoriaStr.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
+        this.estado = estado;
+    }
+
+    // Constructor without categoria
+    public AudioLibro(String identificador, String titulo, String autor, String narrador,
+                      double duracion, String idioma, String isbn, EstadoRecurso estado) {
+        this.identificador = identificador;
+        this.titulo = titulo;
+        this.autor = autor;
+        this.narrador = narrador;
+        this.duracion = duracion;
+        this.idioma = idioma;
+        this.isbn = isbn;
+        this.categoria = CategoriaRecurso.NO_FICCION;
+        this.estado = estado;
+    }
+
+    public CategoriaRecurso getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriaRecurso categoria) {
+        this.categoria = categoria;
+    }
+
+    // String version for compatibility
+    public void setCategoria(String categoriaStr) {
+        try {
+            this.categoria = CategoriaRecurso.valueOf(categoriaStr.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
+    }
+
     @Override
     public boolean estaDisponible() {
         return this.getEstado() == EstadoRecurso.DISPONIBLE;
@@ -50,7 +106,6 @@ public class AudioLibro extends RecursoBase implements Renovable {
         }
     }
 
-    // Implementation of Renovable method
     @Override
     public void renovar() {
         if (this.getEstado() == EstadoRecurso.PRESTADO) {
@@ -66,7 +121,6 @@ public class AudioLibro extends RecursoBase implements Renovable {
     public void setIdentificador(String identificador) {
         this.identificador = identificador;
     }
-
 
     public String getTitulo() {
         return titulo;
@@ -126,6 +180,7 @@ public class AudioLibro extends RecursoBase implements Renovable {
                 ", duracion=" + duracion +
                 ", idioma='" + idioma + '\'' +
                 ", isbn='" + isbn + '\'' +
+                ", categoria=" + categoria +
                 ", estado=" + estado +
                 '}';
     }
