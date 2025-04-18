@@ -148,8 +148,9 @@ public class CLI {
         System.out.println("1. Por identificador");
         System.out.println("2. Por tipo de recurso");
         System.out.println("3. Por estado");
-        System.out.println("4. Por título (usando Streams)"); // New option
-        System.out.println("5. Búsqueda general");
+        System.out.println("4. Por título (usando Streams)");
+        System.out.println("5. Por género/categoría");  // New option
+        System.out.println("6. Búsqueda general");     // Updated number
 
         String opcion = scanner.nextLine();
         List<RecursoDigital> resultados = new ArrayList<>();
@@ -244,6 +245,27 @@ public class CLI {
                         .collect(Collectors.toList());
                 break;
             case "5":
+                // Search by genre/category
+                System.out.print("Ingrese el género o categoría a buscar: ");
+                final String generoBusqueda = scanner.nextLine().toLowerCase();
+
+                resultados = recursos.stream()
+                        .filter(recurso -> {
+                            if (recurso instanceof Libro) {
+                                return ((Libro) recurso).getGenero() != null &&
+                                        ((Libro) recurso).getGenero().toLowerCase().contains(generoBusqueda);
+                            } else if (recurso instanceof AudioLibro) {
+                                return ((AudioLibro) recurso).getGenero() != null &&
+                                        ((AudioLibro) recurso).getGenero().toLowerCase().contains(generoBusqueda);
+                            } else if (recurso instanceof Revista) {
+                                return ((Revista) recurso).getCategoria() != null &&
+                                        ((Revista) recurso).getCategoria().toLowerCase().contains(generoBusqueda);
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+                break;
+            case "6":
                 System.out.print("Ingrese texto a buscar en cualquier campo: ");
                 criterioBusqueda = scanner.nextLine().toLowerCase();
 
@@ -815,8 +837,11 @@ public class CLI {
         System.out.print("Ingrese el autor: ");
         String autor = scanner.nextLine();
 
+        System.out.print("Ingrese el género: ");
+        String genero = scanner.nextLine();
+
         try {
-            Libro libro = new Libro(EstadoRecurso.DISPONIBLE, autor, titulo, id);
+            Libro libro = new Libro(EstadoRecurso.DISPONIBLE, autor, titulo, id, genero);
             recursos.add(libro);
             System.out.println("Libro creado exitosamente.");
         } catch (Exception e) {
@@ -895,18 +920,8 @@ public class CLI {
         System.out.print("Ingrese el narrador: ");
         String narrador = scanner.nextLine();
 
-        double duracion = 0;
-        try {
-            System.out.print("Ingrese la duración (en minutos): ");
-            duracion = Double.parseDouble(scanner.nextLine());
-            if (duracion <= 0) {
-                System.out.println("Error: La duración debe ser positiva.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Error: La duración debe ser un número.");
-            return;
-        }
+        System.out.print("Ingrese la duración (en horas): ");
+        double duracion = Double.parseDouble(scanner.nextLine());
 
         System.out.print("Ingrese el idioma: ");
         String idioma = scanner.nextLine();
@@ -914,10 +929,13 @@ public class CLI {
         System.out.print("Ingrese el ISBN: ");
         String isbn = scanner.nextLine();
 
+        System.out.print("Ingrese el género: ");
+        String genero = scanner.nextLine();
+
         try {
-            AudioLibro audioLibro = new AudioLibro(id, titulo, autor, narrador, duracion, idioma, isbn, EstadoRecurso.DISPONIBLE);
+            AudioLibro audioLibro = new AudioLibro(id, titulo, autor, narrador, duracion, idioma, isbn, genero, EstadoRecurso.DISPONIBLE);
             recursos.add(audioLibro);
-            System.out.println("Audiolibro creado exitosamente.");
+            System.out.println("AudioLibro creado exitosamente.");
         } catch (Exception e) {
             System.out.println("Error al crear el audiolibro: " + e.getMessage());
         }

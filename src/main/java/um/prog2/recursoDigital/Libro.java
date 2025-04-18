@@ -8,11 +8,20 @@ public class Libro extends RecursoBase implements Renovable {
     private String identificador;
     private String titulo;
     private String autor;
+    private String genero;
     private LocalDateTime fechaDevolucion;
     private Usuario usuarioPrestamo;
 
+    // Updated constructor to include genero
+    public Libro(EstadoRecurso estado, String autor, String titulo, String identificador, String genero) {
+        this.estado = estado;
+        this.autor = autor;
+        this.titulo = titulo;
+        this.identificador = identificador;
+        this.genero = genero;
+    }
 
-
+    // Keep the existing constructor for backward compatibility
     public Libro(EstadoRecurso estado, String autor, String titulo, String identificador) {
         this.estado = estado;
         this.autor = autor;
@@ -39,6 +48,15 @@ public class Libro extends RecursoBase implements Renovable {
         this.titulo = titulo;
     }
 
+    // Add getter and setter for genero
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
     @Override
     public String getIdentificador() {
         return identificador;
@@ -54,6 +72,7 @@ public class Libro extends RecursoBase implements Renovable {
                 "identificador='" + identificador + '\'' +
                 ", titulo='" + titulo + '\'' +
                 ", autor='" + autor + '\'' +
+                ", genero='" + genero + '\'' +
                 ", estado=" + estado +
                 '}';
     }

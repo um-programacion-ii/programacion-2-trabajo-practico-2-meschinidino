@@ -11,12 +11,29 @@ public class AudioLibro extends RecursoBase implements Renovable {
     private double duracion;
     private String idioma;
     private String isbn;
+    private String genero; // New field
     private LocalDateTime fechaDevolucion;
     private Usuario usuarioPrestamo;
 
     public AudioLibro() {
     }
 
+    // New constructor with genero
+    public AudioLibro(String identificador, String titulo, String autor, String narrador,
+                      double duracion, String idioma, String isbn, String genero,
+                      EstadoRecurso estado) {
+        this.identificador = identificador;
+        this.titulo = titulo;
+        this.autor = autor;
+        this.narrador = narrador;
+        this.duracion = duracion;
+        this.idioma = idioma;
+        this.isbn = isbn;
+        this.genero = genero;
+        this.estado = estado;
+    }
+
+    // Keep original constructor for compatibility
     public AudioLibro(String identificador, String titulo, String autor, String narrador,
                       double duracion, String idioma, String isbn,
                       EstadoRecurso estado) {
@@ -28,6 +45,15 @@ public class AudioLibro extends RecursoBase implements Renovable {
         this.idioma = idioma;
         this.isbn = isbn;
         this.estado = estado;
+    }
+
+    // Getter and setter for genero
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     // Implementation of Prestable methods
@@ -126,6 +152,7 @@ public class AudioLibro extends RecursoBase implements Renovable {
                 ", duracion=" + duracion +
                 ", idioma='" + idioma + '\'' +
                 ", isbn='" + isbn + '\'' +
+                ", genero='" + genero + '\'' +
                 ", estado=" + estado +
                 '}';
     }
