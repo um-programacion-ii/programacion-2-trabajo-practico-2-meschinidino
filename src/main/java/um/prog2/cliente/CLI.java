@@ -8,6 +8,7 @@ import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CLI {
     private static final Scanner scanner = new Scanner(System.in);
@@ -147,7 +148,8 @@ public class CLI {
         System.out.println("1. Por identificador");
         System.out.println("2. Por tipo de recurso");
         System.out.println("3. Por estado");
-        System.out.println("4. Búsqueda general");
+        System.out.println("4. Por título (usando Streams)"); // New option
+        System.out.println("5. Búsqueda general");
 
         String opcion = scanner.nextLine();
         List<RecursoDigital> resultados = new ArrayList<>();
@@ -223,6 +225,25 @@ public class CLI {
                 }
                 break;
             case "4":
+                // New case for title search using Streams
+                System.out.print("Ingrese el título a buscar: ");
+                final String tituloBusqueda = scanner.nextLine().toLowerCase();
+
+                resultados = recursos.stream()
+                        .filter(recurso -> {
+                            // Match based on resource type
+                            if (recurso instanceof Libro) {
+                                return ((Libro) recurso).getTitulo().toLowerCase().contains(tituloBusqueda);
+                            } else if (recurso instanceof AudioLibro) {
+                                return ((AudioLibro) recurso).getTitulo().toLowerCase().contains(tituloBusqueda);
+                            } else if (recurso instanceof Revista) {
+                                return ((Revista) recurso).getTitulo().toLowerCase().contains(tituloBusqueda);
+                            }
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+                break;
+            case "5":
                 System.out.print("Ingrese texto a buscar en cualquier campo: ");
                 criterioBusqueda = scanner.nextLine().toLowerCase();
 
