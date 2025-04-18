@@ -1,5 +1,8 @@
 package um.prog2.cliente;
 
+import um.prog2.notificaciones.ServicioNotificaciones;
+import um.prog2.notificaciones.ServicioNotificacionesEmail;
+import um.prog2.notificaciones.ServicioNotificacionesSMS;
 import um.prog2.recursoDigital.*;
 import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
@@ -12,6 +15,9 @@ public class CLI {
     private static final Scanner scanner = new Scanner(System.in);
     private static Usuario usuario = null;
     private static final List<RecursoDigital> recursos = new ArrayList<>();
+    private static final ServicioNotificaciones servicioEmail = new ServicioNotificacionesEmail();
+    private static final ServicioNotificaciones servicioSMS = new ServicioNotificacionesSMS();
+    private static ServicioNotificaciones servicioPreferido;
 
     public static void main(String[] args) {
         while (true) {
@@ -173,6 +179,16 @@ public class CLI {
         }
 
         prestable.prestar(usuario);
+
+        if (servicioPreferido != null && usuario != null) {
+            servicioPreferido.enviarNotificacion(
+                    "Has tomado prestado recurso ID: " + recursoSeleccionado.getIdentificador() +
+                            " (" + recursoSeleccionado.getClass().getSimpleName() + ")" +
+                            ". Fecha de devolución: " + prestable.getFechaDevolucion(),
+                    usuario
+            );
+        }
+
         System.out.println("Recurso prestado exitosamente hasta: " + prestable.getFechaDevolucion());
     }
 
@@ -228,6 +244,15 @@ public class CLI {
         Renovable renovable = (Renovable) recursoSeleccionado;
 
         renovable.renovar();
+        if (servicioPreferido != null && usuario != null) {
+            servicioPreferido.enviarNotificacion(
+                    "Has renovado recurso ID: " + recursoSeleccionado.getIdentificador() +
+                            " (" + recursoSeleccionado.getClass().getSimpleName() + ")" +
+                            ". Nueva fecha de devolución: " + renovable.getFechaDevolucion(),
+                    usuario
+            );
+        }
+
         System.out.println("Recurso renovado exitosamente hasta: " + renovable.getFechaDevolucion());
     }
 
@@ -292,7 +317,42 @@ public class CLI {
         System.out.print("Ingrese el email del usuario: ");
         String email = scanner.nextLine();
 
-        usuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email);
+        int telefono = 0;
+        try {
+            System.out.print("Ingrese el numero de telefono del usuario: ");
+            telefono = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: El teléfono debe ser un número entero.");
+            return;
+        }
+
+        // Create user first
+        usuario = GestorUsuario.crearUsuario(nombre, apellido, ID, email, telefono);
+
+        // Ask for notification preference with validation
+        boolean validOption = false;
+        while (!validOption) {
+            System.out.println("Seleccione el método de notificación preferido:");
+            System.out.println("1. Email");
+            System.out.println("2. SMS");
+
+            String opcionNotificacion = scanner.nextLine();
+
+            switch(opcionNotificacion) {
+                case "1":
+                    servicioPreferido = servicioEmail;
+                    validOption = true;
+                    break;
+                case "2":
+                    servicioPreferido = servicioSMS;
+                    validOption = true;
+                    break;
+                default:
+                    System.out.println("Por favor elija un tipo de notificacion para continuar");
+            }
+        }
+
+        servicioPreferido.enviarNotificacion("Bienvenido al sistema de biblioteca digital!", usuario);
         System.out.println("Usuario creado exitosamente: " + usuario);
     }
 

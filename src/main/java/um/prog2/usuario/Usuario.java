@@ -5,14 +5,22 @@ public class Usuario {
     private String apellido;
     private int ID;
     private String email;
+    private int telefono;
 
-    public Usuario(String nombre, String apellido, int ID, String email) {
+    public Usuario(String nombre, String apellido, int ID, String email, int telefono) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.ID = ID;
         this.email = email;
+        this.telefono = telefono;
     }
 
+    public int getTelefono() {
+        return telefono;
+    }
+    public void setTelefono(int telefono) {
+        this.telefono = telefono;
+    }
     public String getNombre() {
         return nombre;
     }
@@ -44,6 +52,7 @@ public class Usuario {
                 ", apellido='" + apellido + '\'' +
                 ", ID='" + ID + '\'' +
                 ", email='" + email + '\'' +
+                ", telefono='" + telefono + '\'' +
                 '}';
     }
 
