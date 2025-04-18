@@ -1,5 +1,6 @@
 package um.prog2.recursoDigital;
 
+import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.interfaces.RecursoDigital;
 
@@ -78,25 +79,24 @@ public class ComparadorRecurso {
         }
     }
 
-    // Género/Categoría comparator
-    public static class PorGeneroOCategoriaAsc implements Comparator<RecursoDigital> {
+    public static class PorCategoriaAsc implements Comparator<RecursoDigital> {
         @Override
         public int compare(RecursoDigital r1, RecursoDigital r2) {
-            String valor1 = getGeneroOCategoria(r1);
-            String valor2 = getGeneroOCategoria(r2);
+            CategoriaRecurso cat1 = getCategoria(r1);
+            CategoriaRecurso cat2 = getCategoria(r2);
 
-            if (valor1 == null && valor2 == null) return 0;
-            if (valor1 == null) return -1;
-            if (valor2 == null) return 1;
+            if (cat1 == null && cat2 == null) return 0;
+            if (cat1 == null) return -1;
+            if (cat2 == null) return 1;
 
-            return valor1.compareToIgnoreCase(valor2);
+            return cat1.name().compareTo(cat2.name());
         }
 
-        private String getGeneroOCategoria(RecursoDigital recurso) {
+        private CategoriaRecurso getCategoria(RecursoDigital recurso) {
             if (recurso instanceof Libro) {
-                return ((Libro) recurso).getGenero();
+                return ((Libro) recurso).getCategoria();
             } else if (recurso instanceof AudioLibro) {
-                return ((AudioLibro) recurso).getGenero();
+                return ((AudioLibro) recurso).getCategoria();
             } else if (recurso instanceof Revista) {
                 return ((Revista) recurso).getCategoria();
             }
@@ -104,7 +104,6 @@ public class ComparadorRecurso {
         }
     }
 
-    // Type comparator
     public static class PorTipo implements Comparator<RecursoDigital> {
         @Override
         public int compare(RecursoDigital r1, RecursoDigital r2) {

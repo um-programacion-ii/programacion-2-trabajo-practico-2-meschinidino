@@ -1,6 +1,7 @@
 // src/main/java/um/prog2/utilsRecursosCLI/GestorRecursosConsola.java
 package um.prog2.cliente.utilsRecursosCLI;
 
+import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.interfaces.Prestable;
 import um.prog2.interfaces.RecursoDigital;
@@ -64,9 +65,27 @@ public class GestorRecursosConsola {
     private Libro crearLibro(String id, String titulo) {
         System.out.print("Autor: ");
         String autor = scanner.nextLine();
-        System.out.print("Género: ");
-        String genero = scanner.nextLine();
-        return new Libro(EstadoRecurso.DISPONIBLE, autor, titulo, id, genero);
+
+        System.out.println("Categorías disponibles:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i].name().replace("_", " "));
+        }
+
+        CategoriaRecurso categoria = CategoriaRecurso.NO_FICCION;
+        System.out.print("Seleccione número de categoría: ");
+        try {
+            int seleccion = Integer.parseInt(scanner.nextLine());
+            if (seleccion >= 1 && seleccion <= categorias.length) {
+                categoria = categorias[seleccion - 1];
+            } else {
+                System.out.println("Selección fuera de rango, usando categoría por defecto: NO_FICCION");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada no válida, usando categoría por defecto: NO_FICCION");
+        }
+
+        return new Libro(EstadoRecurso.DISPONIBLE, autor, titulo, id, categoria);
     }
 
     private AudioLibro crearAudioLibro(String id, String titulo) {
@@ -84,16 +103,51 @@ public class GestorRecursosConsola {
             return null;
         }
 
-        System.out.print("Género: ");
-        String genero = scanner.nextLine();
-        return new AudioLibro(id, titulo, autor, narrador, duracion, "Español", "", genero, EstadoRecurso.DISPONIBLE);
+        System.out.println("Categorías disponibles:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i].name().replace("_", " "));
+        }
+
+        CategoriaRecurso categoria = CategoriaRecurso.NO_FICCION;
+        System.out.print("Seleccione número de categoría: ");
+        try {
+            int seleccion = Integer.parseInt(scanner.nextLine());
+            if (seleccion >= 1 && seleccion <= categorias.length) {
+                categoria = categorias[seleccion - 1];
+            } else {
+                System.out.println("Selección fuera de rango, usando categoría por defecto: NO_FICCION");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada no válida, usando categoría por defecto: NO_FICCION");
+        }
+
+        return new AudioLibro(id, titulo, autor, narrador, duracion, "Español", "", categoria, EstadoRecurso.DISPONIBLE);
     }
 
     private Revista crearRevista(String id, String titulo) {
         System.out.print("Editorial: ");
         String editorial = scanner.nextLine();
-        System.out.print("Categoría: ");
-        String categoria = scanner.nextLine();
+
+        System.out.println("Categorías disponibles:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i].name().replace("_", " "));
+        }
+
+        CategoriaRecurso categoria = CategoriaRecurso.NO_FICCION; // Default category
+        System.out.print("Seleccione número de categoría: ");
+        try {
+            int seleccion = Integer.parseInt(scanner.nextLine());
+            if (seleccion >= 1 && seleccion <= categorias.length) {
+                categoria = categorias[seleccion - 1];
+            } else {
+                System.out.println("Selección fuera de rango, usando categoría por defecto: NO_FICCION");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada no válida, usando categoría por defecto: NO_FICCION");
+        }
+
         return new Revista(EstadoRecurso.DISPONIBLE, 0, "", "", categoria, editorial, titulo, id);
     }
 

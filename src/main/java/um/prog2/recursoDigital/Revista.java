@@ -1,5 +1,6 @@
 package um.prog2.recursoDigital;
 
+import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.interfaces.Prestable;
 import um.prog2.usuario.Usuario;
@@ -9,7 +10,7 @@ public class Revista extends RecursoBase implements Prestable {
     private String identificador;
     private String titulo;
     private String editorial;
-    private String categoria;
+    private CategoriaRecurso categoria; // Changed from String to enum
     private String fechaPublicacion;
     private String issn;
     private int numeroPaginas;
@@ -17,9 +18,12 @@ public class Revista extends RecursoBase implements Prestable {
     private Usuario usuarioPrestamo;
 
     public Revista() {
+        this.categoria = CategoriaRecurso.NO_FICCION; // Default category
     }
 
-    public Revista(EstadoRecurso estado, int numeroPaginas, String issn, String fechaPublicacion, String categoria, String editorial, String titulo, String identificador) {
+    // Updated constructor with CategoriaRecurso
+    public Revista(EstadoRecurso estado, int numeroPaginas, String issn, String fechaPublicacion,
+                   CategoriaRecurso categoria, String editorial, String titulo, String identificador) {
         this.estado = estado;
         this.numeroPaginas = numeroPaginas;
         this.issn = issn;
@@ -30,7 +34,24 @@ public class Revista extends RecursoBase implements Prestable {
         this.identificador = identificador;
     }
 
-    // Implement Prestable methods
+    // Constructor with String for backward compatibility
+    public Revista(EstadoRecurso estado, int numeroPaginas, String issn, String fechaPublicacion,
+                   String categoriaStr, String editorial, String titulo, String identificador) {
+        this.estado = estado;
+        this.numeroPaginas = numeroPaginas;
+        this.issn = issn;
+        this.fechaPublicacion = fechaPublicacion;
+        try {
+            this.categoria = CategoriaRecurso.valueOf(categoriaStr.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
+        this.editorial = editorial;
+        this.titulo = titulo;
+        this.identificador = identificador;
+    }
+
+    // Implement Prestable methods - unchanged
     @Override
     public boolean estaDisponible() {
         return this.getEstado() == EstadoRecurso.DISPONIBLE;
@@ -50,6 +71,7 @@ public class Revista extends RecursoBase implements Prestable {
         }
     }
 
+    // Other getters and setters - unchanged
     public int getNumeroPaginas() {
         return numeroPaginas;
     }
@@ -74,12 +96,22 @@ public class Revista extends RecursoBase implements Prestable {
         this.fechaPublicacion = fechaPublicacion;
     }
 
-    public String getCategoria() {
+    // Updated getter and setter for categoria
+    public CategoriaRecurso getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(String categoria) {
+    public void setCategoria(CategoriaRecurso categoria) {
         this.categoria = categoria;
+    }
+
+    // String version for backward compatibility
+    public void setCategoria(String categoriaStr) {
+        try {
+            this.categoria = CategoriaRecurso.valueOf(categoriaStr.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
     }
 
     public String getEditorial() {
@@ -113,7 +145,7 @@ public class Revista extends RecursoBase implements Prestable {
                 "identificador='" + identificador + '\'' +
                 ", titulo='" + titulo + '\'' +
                 ", editorial='" + editorial + '\'' +
-                ", categoria='" + categoria + '\'' +
+                ", categoria=" + categoria +
                 ", fechaPublicacion='" + fechaPublicacion + '\'' +
                 ", issn='" + issn + '\'' +
                 ", numeroPaginas=" + numeroPaginas +

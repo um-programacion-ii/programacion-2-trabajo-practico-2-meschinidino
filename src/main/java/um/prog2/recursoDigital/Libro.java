@@ -1,5 +1,6 @@
 package um.prog2.recursoDigital;
 
+import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.interfaces.Renovable;
 import um.prog2.usuario.Usuario;
@@ -10,28 +11,44 @@ public class Libro extends RecursoBase implements Renovable {
     private String identificador;
     private String titulo;
     private String autor;
-    private String genero;
+    private CategoriaRecurso categoria;
     private LocalDateTime fechaDevolucion;
     private Usuario usuarioPrestamo;
 
-    // Updated constructor to include genero
+    // Updated constructor to use CategoriaRecurso enum
+    public Libro(EstadoRecurso estado, String autor, String titulo, String identificador, CategoriaRecurso categoria) {
+        this.estado = estado;
+        this.autor = autor;
+        this.titulo = titulo;
+        this.identificador = identificador;
+        this.categoria = categoria;
+    }
+
+    // Constructor that takes String for backward compatibility, converts to enum
     public Libro(EstadoRecurso estado, String autor, String titulo, String identificador, String genero) {
         this.estado = estado;
         this.autor = autor;
         this.titulo = titulo;
         this.identificador = identificador;
-        this.genero = genero;
+        try {
+            this.categoria = CategoriaRecurso.valueOf(genero.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            // Default to NO_FICCION if genre doesn't match any enum value
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
     }
 
-    // Keep the existing constructor for backward compatibility
+    // Basic constructor still needed
     public Libro(EstadoRecurso estado, String autor, String titulo, String identificador) {
         this.estado = estado;
         this.autor = autor;
         this.titulo = titulo;
         this.identificador = identificador;
+        this.categoria = CategoriaRecurso.NO_FICCION; // Default category
     }
 
     public Libro() {
+        this.categoria = CategoriaRecurso.NO_FICCION; // Default category
     }
 
     public String getAutor() {
@@ -50,13 +67,26 @@ public class Libro extends RecursoBase implements Renovable {
         this.titulo = titulo;
     }
 
-    // Add getter and setter for genero
+    // Updated getter and setter for categoria
+    public CategoriaRecurso getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriaRecurso categoria) {
+        this.categoria = categoria;
+    }
+
+    // For backward compatibility
     public String getGenero() {
-        return genero;
+        return categoria != null ? categoria.name().replace("_", " ") : null;
     }
 
     public void setGenero(String genero) {
-        this.genero = genero;
+        try {
+            this.categoria = CategoriaRecurso.valueOf(genero.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            this.categoria = CategoriaRecurso.NO_FICCION;
+        }
     }
 
     @Override
@@ -74,7 +104,7 @@ public class Libro extends RecursoBase implements Renovable {
                 "identificador='" + identificador + '\'' +
                 ", titulo='" + titulo + '\'' +
                 ", autor='" + autor + '\'' +
-                ", genero='" + genero + '\'' +
+                ", categoria=" + categoria +
                 ", estado=" + estado +
                 '}';
     }

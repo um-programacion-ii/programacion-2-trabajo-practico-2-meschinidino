@@ -1,5 +1,6 @@
 package um.prog2.cliente.utilsRecursosCLI;
 
+import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.recursoDigital.*;
 
@@ -75,21 +76,36 @@ public class BuscadorRecursos {
     }
 
     private void buscarPorGenero() {
-        System.out.print("Ingrese el género/categoría a buscar: ");
-        String terminoBusqueda = scanner.nextLine().toLowerCase();
+        System.out.println("Categorías disponibles:");
+        CategoriaRecurso[] categorias = CategoriaRecurso.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + ". " + categorias[i].name().replace("_", " "));
+        }
 
-        List<RecursoDigital> resultados = buscar(recurso -> {
-            if (recurso instanceof Libro) {
-                return ((Libro) recurso).getGenero().toLowerCase().contains(terminoBusqueda);
-            } else if (recurso instanceof AudioLibro) {
-                return ((AudioLibro) recurso).getGenero().toLowerCase().contains(terminoBusqueda);
-            } else if (recurso instanceof Revista) {
-                return ((Revista) recurso).getCategoria().toLowerCase().contains(terminoBusqueda);
+        System.out.print("Seleccione número de categoría a buscar: ");
+        try {
+            int seleccion = Integer.parseInt(scanner.nextLine());
+            if (seleccion >= 1 && seleccion <= categorias.length) {
+                CategoriaRecurso categoriaBuscada = categorias[seleccion - 1];
+
+                List<RecursoDigital> resultados = buscar(recurso -> {
+                    if (recurso instanceof Libro) {
+                        return ((Libro) recurso).getCategoria() == categoriaBuscada;
+                    } else if (recurso instanceof AudioLibro) {
+                        return ((AudioLibro) recurso).getCategoria() == categoriaBuscada;
+                    } else if (recurso instanceof Revista) {
+                        return ((Revista) recurso).getCategoria() == categoriaBuscada;
+                    }
+                    return false;
+                });
+
+                mostrarResultadosBusqueda(resultados, "categoría: " + categoriaBuscada.name().replace("_", " "));
+            } else {
+                System.out.println("Selección fuera de rango.");
             }
-            return false;
-        });
-
-        mostrarResultadosBusqueda(resultados, "género/categoría");
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada no válida.");
+        }
     }
 
     private List<RecursoDigital> buscar(Predicate<RecursoDigital> condicion) {
