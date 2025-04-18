@@ -89,10 +89,11 @@ public class CLI {
         System.out.println("3. Crear revista");
         System.out.println("4. Ver todos los recursos");
         System.out.println("5. Ver detalles de un recurso");
-        System.out.println("6. Cambiar estado de un recurso");
-        System.out.println("7. Prestar un recurso");
-        System.out.println("8. Renovar un recurso");
-        System.out.println("9. Volver al menú principal");
+        System.out.println("6. Buscar recursos");
+        System.out.println("7. Cambiar estado de un recurso");
+        System.out.println("8. Prestar un recurso");
+        System.out.println("9. Renovar un recurso");
+        System.out.println("10. Volver al menú principal");
         mostrarSeparador();
         System.out.print("Seleccione una opción: ");
         String opcion = scanner.nextLine();
@@ -114,19 +115,285 @@ public class CLI {
                 verDetallesRecurso();
                 break;
             case "6":
-                cambiarEstadoRecurso();
+                buscarRecursos();
                 break;
             case "7":
-                prestarRecurso();
+                cambiarEstadoRecurso();
                 break;
             case "8":
-                renovarRecurso();
+                prestarRecurso();
                 break;
             case "9":
+                renovarRecurso();
+                break;
+            case "10":
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
         }
+    }
+
+    private static void buscarRecursos() {
+        mostrarSeparador();
+        System.out.println("BUSCAR RECURSOS");
+        mostrarSeparador();
+
+        if (recursos.isEmpty()) {
+            System.out.println("No hay recursos registrados.");
+            return;
+        }
+
+        System.out.println("Seleccione criterio de búsqueda:");
+        System.out.println("1. Por identificador");
+        System.out.println("2. Por tipo de recurso");
+        System.out.println("3. Por estado");
+        System.out.println("4. Búsqueda general");
+
+        String opcion = scanner.nextLine();
+        List<RecursoDigital> resultados = new ArrayList<>();
+        String criterioBusqueda;
+
+        switch (opcion) {
+            case "1":
+                System.out.print("Ingrese el identificador a buscar: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (RecursoDigital recurso : recursos) {
+                    if (recurso.getIdentificador().toLowerCase().contains(criterioBusqueda)) {
+                        resultados.add(recurso);
+                    }
+                }
+                break;
+            case "2":
+                System.out.println("Seleccione el tipo de recurso:");
+                System.out.println("1. Libro");
+                System.out.println("2. AudioLibro");
+                System.out.println("3. Revista");
+                String tipoRecurso = scanner.nextLine();
+
+                Class<?> claseRecurso = null;
+                switch (tipoRecurso) {
+                    case "1":
+                        claseRecurso = Libro.class;
+                        break;
+                    case "2":
+                        claseRecurso = AudioLibro.class;
+                        break;
+                    case "3":
+                        claseRecurso = Revista.class;
+                        break;
+                    default:
+                        System.out.println("Tipo de recurso no válido.");
+                        return;
+                }
+
+                for (RecursoDigital recurso : recursos) {
+                    if (recurso.getClass().equals(claseRecurso)) {
+                        resultados.add(recurso);
+                    }
+                }
+                break;
+            case "3":
+                System.out.println("Seleccione el estado:");
+                System.out.println("1. DISPONIBLE");
+                System.out.println("2. PRESTADO");
+                System.out.println("3. RESERVADO");
+                String estadoStr = scanner.nextLine();
+
+                EstadoRecurso estado = null;
+                switch (estadoStr) {
+                    case "1":
+                        estado = EstadoRecurso.DISPONIBLE;
+                        break;
+                    case "2":
+                        estado = EstadoRecurso.PRESTADO;
+                        break;
+                    case "3":
+                        estado = EstadoRecurso.RESERVADO;
+                        break;
+                    default:
+                        System.out.println("Estado no válido.");
+                        return;
+                }
+
+                for (RecursoDigital recurso : recursos) {
+                    if (recurso.getEstado() == estado) {
+                        resultados.add(recurso);
+                    }
+                }
+                break;
+            case "4":
+                System.out.print("Ingrese texto a buscar en cualquier campo: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (RecursoDigital recurso : recursos) {
+                    String infoRecurso = recurso.toString().toLowerCase();
+                    if (infoRecurso.contains(criterioBusqueda)) {
+                        resultados.add(recurso);
+                    }
+                }
+                break;
+            default:
+                System.out.println("Opción no válida.");
+                return;
+        }
+
+        mostrarResultadosRecursos(resultados);
+    }
+
+    private static void mostrarResultadosRecursos(List<RecursoDigital> resultados) {
+        mostrarSeparador();
+        if (resultados.isEmpty()) {
+            System.out.println("No se encontraron recursos que coincidan con el criterio de búsqueda.");
+        } else {
+            System.out.println("RESULTADOS DE BÚSQUEDA (" + resultados.size() + " encontrados):");
+            for (int i = 0; i < resultados.size(); i++) {
+                RecursoDigital recurso = resultados.get(i);
+                System.out.println("[" + i + "] ID: " + recurso.getIdentificador() +
+                        ", Tipo: " + recurso.getClass().getSimpleName() +
+                        ", Estado: " + recurso.getEstado());
+            }
+
+            // Option to view details of a resource from results
+            System.out.print("¿Desea ver los detalles de algún recurso? (S/N): ");
+            String seleccionar = scanner.nextLine();
+            if (seleccionar.equalsIgnoreCase("S")) {
+                try {
+                    System.out.print("Ingrese el número del recurso a ver: ");
+                    int index = Integer.parseInt(scanner.nextLine());
+
+                    if (index >= 0 && index < resultados.size()) {
+                        mostrarSeparador();
+                        System.out.println("DETALLE COMPLETO:");
+                        System.out.println(resultados.get(index).toString());
+                        mostrarSeparador();
+
+                        // Additional actions menu for the selected resource
+                        mostrarAccionesRecurso(resultados.get(index));
+                    } else {
+                        System.out.println("Índice inválido.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: El índice debe ser un número entero.");
+                }
+            }
+        }
+    }
+
+    private static void mostrarAccionesRecurso(RecursoDigital recurso) {
+        System.out.println("\nAcciones disponibles para este recurso:");
+        System.out.println("1. Cambiar estado");
+        if (recurso instanceof Prestable && recurso.getEstado() == EstadoRecurso.DISPONIBLE) {
+            System.out.println("2. Prestar recurso");
+        }
+        if (recurso instanceof Renovable && recurso.getEstado() == EstadoRecurso.PRESTADO) {
+            System.out.println("3. Renovar préstamo");
+        }
+        System.out.println("4. Volver al menú");
+
+        System.out.print("Seleccione una opción: ");
+        String opcion = scanner.nextLine();
+
+        switch (opcion) {
+            case "1":
+                cambiarEstadoRecursoEspecifico(recurso);
+                break;
+            case "2":
+                if (recurso instanceof Prestable && recurso.getEstado() == EstadoRecurso.DISPONIBLE) {
+                    prestarRecursoEspecifico(recurso);
+                } else {
+                    System.out.println("Opción no válida para este recurso.");
+                }
+                break;
+            case "3":
+                if (recurso instanceof Renovable && recurso.getEstado() == EstadoRecurso.PRESTADO) {
+                    renovarRecursoEspecifico(recurso);
+                } else {
+                    System.out.println("Opción no válida para este recurso.");
+                }
+                break;
+            case "4":
+                return;
+            default:
+                System.out.println("Opción no válida.");
+        }
+    }
+
+    private static void cambiarEstadoRecursoEspecifico(RecursoDigital recurso) {
+        System.out.println("Estados disponibles:");
+        System.out.println("1. DISPONIBLE");
+        System.out.println("2. PRESTADO");
+        System.out.println("3. RESERVADO");
+
+        System.out.print("Seleccione el nuevo estado: ");
+        String estadoStr = scanner.nextLine();
+
+        EstadoRecurso nuevoEstado;
+        switch (estadoStr) {
+            case "1":
+                nuevoEstado = EstadoRecurso.DISPONIBLE;
+                break;
+            case "2":
+                nuevoEstado = EstadoRecurso.PRESTADO;
+                break;
+            case "3":
+                nuevoEstado = EstadoRecurso.RESERVADO;
+                break;
+            default:
+                System.out.println("Opción inválida.");
+                return;
+        }
+
+        recurso.actualizarEstado(nuevoEstado);
+        System.out.println("Estado actualizado exitosamente.");
+    }
+
+    private static void prestarRecursoEspecifico(RecursoDigital recurso) {
+        if (usuarioActual == null) {
+            System.out.println("Error: Debe seleccionar un usuario antes de prestar un recurso.");
+            return;
+        }
+
+        Prestable prestable = (Prestable) recurso;
+
+        if (!prestable.estaDisponible()) {
+            System.out.println("Este recurso no está disponible para préstamo.");
+            return;
+        }
+
+        prestable.prestar(usuarioActual);
+
+        if (servicioPreferido != null) {
+            servicioPreferido.enviarNotificacion(
+                    "Has tomado prestado recurso ID: " + recurso.getIdentificador() +
+                            " (" + recurso.getClass().getSimpleName() + ")" +
+                            ". Fecha de devolución: " + prestable.getFechaDevolucion(),
+                    usuarioActual
+            );
+        }
+
+        System.out.println("Recurso prestado exitosamente hasta: " + prestable.getFechaDevolucion());
+    }
+
+    private static void renovarRecursoEspecifico(RecursoDigital recurso) {
+        if (usuarioActual == null) {
+            System.out.println("Error: Debe seleccionar un usuario antes de renovar un recurso.");
+            return;
+        }
+
+        Renovable renovable = (Renovable) recurso;
+        renovable.renovar();
+
+        if (servicioPreferido != null) {
+            servicioPreferido.enviarNotificacion(
+                    "Has renovado recurso ID: " + recurso.getIdentificador() +
+                            " (" + recurso.getClass().getSimpleName() + ")" +
+                            ". Nueva fecha de devolución: " + renovable.getFechaDevolucion(),
+                    usuarioActual
+            );
+        }
+
+        System.out.println("Recurso renovado exitosamente hasta: " + renovable.getFechaDevolucion());
     }
 
     private static void buscarUsuarios() {
