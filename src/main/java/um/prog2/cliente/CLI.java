@@ -54,7 +54,8 @@ public class CLI {
         System.out.println("1. Crear usuario");
         System.out.println("2. Ver usuarios");
         System.out.println("3. Seleccionar usuario");
-        System.out.println("4. Volver al menú principal");
+        System.out.println("4. Buscar usuarios");
+        System.out.println("5. Volver al menú principal");
         mostrarSeparador();
         System.out.print("Seleccione una opción: ");
         String opcion = scanner.nextLine();
@@ -70,6 +71,9 @@ public class CLI {
                 seleccionarUsuario();
                 break;
             case "4":
+                buscarUsuarios();
+                break;
+            case "5":
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
@@ -122,6 +126,108 @@ public class CLI {
                 return;
             default:
                 System.out.println("Opción no válida. Por favor, intente de nuevo.");
+        }
+    }
+
+    private static void buscarUsuarios() {
+        mostrarSeparador();
+        System.out.println("BUSCAR USUARIOS");
+        mostrarSeparador();
+
+        if (usuarios.isEmpty()) {
+            System.out.println("No hay usuarios registrados.");
+            return;
+        }
+
+        System.out.println("Seleccione criterio de búsqueda:");
+        System.out.println("1. Por nombre");
+        System.out.println("2. Por apellido");
+        System.out.println("3. Por email");
+        System.out.println("4. Búsqueda general");
+
+        String opcion = scanner.nextLine();
+        String criterioBusqueda;
+        List<Usuario> resultados = new ArrayList<>();
+
+        switch (opcion) {
+            case "1":
+                System.out.print("Ingrese el nombre a buscar: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (Usuario usuario : usuarios.values()) {
+                    if (usuario.getNombre().toLowerCase().contains(criterioBusqueda)) {
+                        resultados.add(usuario);
+                    }
+                }
+                break;
+            case "2":
+                System.out.print("Ingrese el apellido a buscar: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (Usuario usuario : usuarios.values()) {
+                    if (usuario.getApellido().toLowerCase().contains(criterioBusqueda)) {
+                        resultados.add(usuario);
+                    }
+                }
+                break;
+            case "3":
+                System.out.print("Ingrese el email a buscar: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (Usuario usuario : usuarios.values()) {
+                    if (usuario.getEmail().toLowerCase().contains(criterioBusqueda)) {
+                        resultados.add(usuario);
+                    }
+                }
+                break;
+            case "4":
+                System.out.print("Ingrese texto a buscar en cualquier campo: ");
+                criterioBusqueda = scanner.nextLine().toLowerCase();
+
+                for (Usuario usuario : usuarios.values()) {
+                    if (usuario.getNombre().toLowerCase().contains(criterioBusqueda) ||
+                            usuario.getApellido().toLowerCase().contains(criterioBusqueda) ||
+                            usuario.getEmail().toLowerCase().contains(criterioBusqueda) ||
+                            String.valueOf(usuario.getID()).contains(criterioBusqueda)) {
+                        resultados.add(usuario);
+                    }
+                }
+                break;
+            default:
+                System.out.println("Opción no válida.");
+                return;
+        }
+
+        // Display results
+        mostrarResultadosBusqueda(resultados);
+    }
+
+    private static void mostrarResultadosBusqueda(List<Usuario> resultados) {
+        mostrarSeparador();
+        if (resultados.isEmpty()) {
+            System.out.println("No se encontraron usuarios que coincidan con el criterio de búsqueda.");
+        } else {
+            System.out.println("RESULTADOS DE BÚSQUEDA (" + resultados.size() + " encontrados):");
+            for (Usuario usuario : resultados) {
+                System.out.println("ID: " + usuario.getID() +
+                        " - " + usuario.getNombre() + " " + usuario.getApellido() +
+                        " - Email: " + usuario.getEmail());
+            }
+
+            // Option to select a user from results
+            System.out.print("¿Desea seleccionar algún usuario? (S/N): ");
+            String seleccionar = scanner.nextLine();
+            if (seleccionar.equalsIgnoreCase("S")) {
+                System.out.print("Ingrese el ID del usuario a seleccionar: ");
+                String userID = scanner.nextLine();
+
+                if (usuarios.containsKey(userID)) {
+                    usuarioActual = usuarios.get(userID);
+                    System.out.println("Usuario seleccionado: " + usuarioActual);
+                } else {
+                    System.out.println("No se encontró un usuario con ese ID.");
+                }
+            }
         }
     }
 
