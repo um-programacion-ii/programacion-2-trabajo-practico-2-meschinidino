@@ -1,8 +1,11 @@
 package um.prog2.cliente;
 
-import um.prog2.notificaciones.ServicioNotificaciones;
-import um.prog2.notificaciones.ServicioNotificacionesEmail;
-import um.prog2.notificaciones.ServicioNotificacionesSMS;
+import um.prog2.Enums.EstadoRecurso;
+import um.prog2.interfaces.Prestable;
+import um.prog2.interfaces.RecursoDigital;
+import um.prog2.interfaces.Renovable;
+import um.prog2.interfaces.ServicioNotificaciones;
+import um.prog2.notificaciones.*;
 import um.prog2.recursoDigital.*;
 import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
@@ -1015,3 +1018,4 @@ public class CLI {
         System.out.println("------------------------------------------------");
     }
 }
+

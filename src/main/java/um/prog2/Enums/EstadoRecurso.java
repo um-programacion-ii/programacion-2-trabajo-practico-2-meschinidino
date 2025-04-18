@@ -1,4 +1,4 @@
-package um.prog2.recursoDigital;
+package um.prog2.Enums;
 
 public enum EstadoRecurso {
     DISPONIBLE,

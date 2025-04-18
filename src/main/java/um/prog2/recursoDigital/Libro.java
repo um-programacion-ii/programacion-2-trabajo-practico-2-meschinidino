@@ -1,5 +1,7 @@
 package um.prog2.recursoDigital;
 
+import um.prog2.Enums.EstadoRecurso;
+import um.prog2.interfaces.Renovable;
 import um.prog2.usuario.Usuario;
 
 import java.time.LocalDateTime;
