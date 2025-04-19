@@ -134,4 +134,15 @@ public class Libro extends RecursoBase implements Renovable {
             this.fechaDevolucion = LocalDateTime.now().plusDays(14);
         }
     }
+
+    @Override
+    public boolean devolver() {
+        if (this.getEstado() == EstadoRecurso.PRESTADO) {
+            this.setEstado(EstadoRecurso.DISPONIBLE);
+            this.usuarioPrestamo = null;
+            this.fechaDevolucion = null;
+            return true;
+        }
+        return false;
+    }
 }

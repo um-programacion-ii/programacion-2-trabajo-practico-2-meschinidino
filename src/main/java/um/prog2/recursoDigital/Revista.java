@@ -71,6 +71,17 @@ public class Revista extends RecursoBase implements Prestable {
         }
     }
 
+    @Override
+    public boolean devolver() {
+        if (this.getEstado() == EstadoRecurso.PRESTADO) {
+            this.setEstado(EstadoRecurso.DISPONIBLE);
+            this.usuarioPrestamo = null;
+            this.fechaDevolucion = null;
+            return true;
+        }
+        return false;
+    }
+
     // Other getters and setters - unchanged
     public int getNumeroPaginas() {
         return numeroPaginas;

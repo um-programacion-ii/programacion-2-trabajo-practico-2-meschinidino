@@ -107,6 +107,17 @@ public class AudioLibro extends RecursoBase implements Renovable {
     }
 
     @Override
+    public boolean devolver() {
+        if (this.getEstado() == EstadoRecurso.PRESTADO) {
+            this.setEstado(EstadoRecurso.DISPONIBLE);
+            this.usuarioPrestamo = null;
+            this.fechaDevolucion = null;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void renovar() {
         if (this.getEstado() == EstadoRecurso.PRESTADO) {
             this.fechaDevolucion = this.fechaDevolucion.plusDays(7);
