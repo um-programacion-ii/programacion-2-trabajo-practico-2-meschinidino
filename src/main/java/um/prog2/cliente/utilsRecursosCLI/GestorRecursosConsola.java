@@ -3,6 +3,7 @@ package um.prog2.cliente.utilsRecursosCLI;
 
 import um.prog2.Enums.CategoriaRecurso;
 import um.prog2.Enums.EstadoRecurso;
+import um.prog2.excepciones.RecursoNoDisponibleException;
 import um.prog2.interfaces.Prestable;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.Renovable;
@@ -191,7 +192,11 @@ public class GestorRecursosConsola {
         try {
             int index = Integer.parseInt(scanner.nextLine());
             if (index >= 0 && index < disponibles.size()) {
-                prestarRecursoEspecifico(disponibles.get(index), usuarioActual);
+                try {
+                    prestarRecursoEspecifico(disponibles.get(index), usuarioActual);
+                } catch (RecursoNoDisponibleException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
             } else {
                 System.out.println("Índice no válido");
             }
@@ -226,7 +231,11 @@ public class GestorRecursosConsola {
         try {
             int index = Integer.parseInt(scanner.nextLine());
             if (index >= 0 && index < prestados.size()) {
-                renovarRecursoEspecifico(prestados.get(index), usuarioActual);
+                try {
+                    renovarRecursoEspecifico(prestados.get(index), usuarioActual);
+                } catch (RecursoNoDisponibleException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
             } else {
                 System.out.println("Índice no válido");
             }
@@ -235,7 +244,11 @@ public class GestorRecursosConsola {
         }
     }
 
-    private void prestarRecursoEspecifico(RecursoDigital recurso, Usuario usuario) {
+    private void prestarRecursoEspecifico(RecursoDigital recurso, Usuario usuario) throws RecursoNoDisponibleException {
+        if (recurso.getEstado() != EstadoRecurso.DISPONIBLE) {
+            throw new RecursoNoDisponibleException("El recurso " + getTitulo(recurso) + " no está disponible para préstamo");
+        }
+
         Prestable prestable = (Prestable) recurso;
         prestable.prestar(usuario);
 
@@ -248,7 +261,11 @@ public class GestorRecursosConsola {
         System.out.println("Recurso prestado hasta: " + prestable.getFechaDevolucion());
     }
 
-    private void renovarRecursoEspecifico(RecursoDigital recurso, Usuario usuario) {
+    private void renovarRecursoEspecifico(RecursoDigital recurso, Usuario usuario) throws RecursoNoDisponibleException {
+        if (recurso.getEstado() != EstadoRecurso.PRESTADO) {
+            throw new RecursoNoDisponibleException("El recurso " + getTitulo(recurso) + " no está prestado y no puede ser renovado");
+        }
+
         Renovable renovable = (Renovable) recurso;
         renovable.renovar();
 
