@@ -302,4 +302,49 @@ public class GestorRecursosConsola {
         }
     }
 
+    /**
+     * Muestra los recursos que pueden ser devueltos y permite al usuario seleccionar uno.
+     * 
+     * @param usuarioActual Usuario que solicita la devolución
+     */
+    public void devolverRecurso(Usuario usuarioActual) {
+        if (usuarioActual == null) {
+            System.out.println("Debe seleccionar un usuario primero");
+            return;
+        }
+
+        // Obtener recursos para devolver usando GestorRecursos
+        List<RecursoDigital> prestados = gestorRecursos.obtenerRecursosParaDevolver();
+        System.out.println("\n-- RECURSOS PARA DEVOLVER --");
+
+        if (prestados.isEmpty()) {
+            System.out.println("No hay recursos para devolver");
+            return;
+        }
+
+        // Mostrar recursos prestados
+        for (int i = 0; i < prestados.size(); i++) {
+            RecursoDigital r = prestados.get(i);
+            System.out.println(i + " - " + r.getIdentificador() +
+                    " - " + gestorRecursos.getTitulo(r) + " (" + r.getClass().getSimpleName() + ")");
+        }
+
+        System.out.print("Seleccione número de recurso: ");
+        try {
+            int index = Integer.parseInt(scanner.nextLine());
+            if (index >= 0 && index < prestados.size()) {
+                try {
+                    // Usar GestorRecursos para devolver el recurso
+                    gestorRecursos.devolverRecurso(prestados.get(index), usuarioActual);
+                    System.out.println("Recurso devuelto con éxito");
+                } catch (RecursoNoDisponibleException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Índice no válido");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Debe ingresar un número");
+        }
+    }
 }

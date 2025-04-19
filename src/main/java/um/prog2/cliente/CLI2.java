@@ -193,8 +193,9 @@ public class CLI2 {
             System.out.println("2. Ver recursos");
             System.out.println("3. Prestar recurso");
             System.out.println("4. Renovar recurso");
-            System.out.println("5. Buscar recursos"); // New option
-            System.out.println("6. Volver al menú principal");
+            System.out.println("5. Devolver recurso");
+            System.out.println("6. Buscar recursos");
+            System.out.println("7. Volver al menú principal");
             System.out.print("Seleccione una opción: ");
             String opcion = scanner.nextLine();
 
@@ -203,8 +204,9 @@ public class CLI2 {
                 case "2": gestorRecursos.listarRecursos(); break;
                 case "3": gestorRecursos.prestarRecurso(usuarioActual); break;
                 case "4": gestorRecursos.renovarRecurso(usuarioActual); break;
-                case "5": buscadorRecursos.mostrarMenuBusqueda(); break; // Call the new search menu
-                case "6": return;
+                case "5": gestorRecursos.devolverRecurso(usuarioActual); break;
+                case "6": buscadorRecursos.mostrarMenuBusqueda(); break;
+                case "7": return;
                 default: System.out.println("Opción no válida. Intente de nuevo.");
             }
         }
