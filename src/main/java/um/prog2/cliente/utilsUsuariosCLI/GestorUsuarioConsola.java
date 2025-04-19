@@ -1,5 +1,6 @@
 package um.prog2.cliente.utilsUsuariosCLI;
 
+import um.prog2.excepciones.UsuarioNoEncontradoException;
 import um.prog2.interfaces.ServicioNotificaciones;
 import um.prog2.notificaciones.*;
 import um.prog2.usuario.GestorUsuario;
@@ -77,14 +78,23 @@ public class GestorUsuarioConsola {
         System.out.print("ID del usuario a seleccionar (o vacío para cancelar): ");
         String id = scanner.nextLine();
 
-        if (!id.isEmpty() && usuarios.containsKey(id)) {
+        if (id.isEmpty()) {
+            System.out.println("No se seleccionó ningún usuario");
+            return null;
+        }
+
+        try {
+            if (!usuarios.containsKey(id)) {
+                throw new UsuarioNoEncontradoException("No se encontró un usuario con ID: " + id);
+            }
+
             Usuario seleccionado = usuarios.get(id);
             System.out.println("Usuario seleccionado: " + seleccionado.getNombre() + " " + seleccionado.getApellido());
             return seleccionado;
+        } catch (UsuarioNoEncontradoException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
         }
-
-        System.out.println("No se seleccionó ningún usuario");
-        return null;
     }
 
     public ServicioNotificaciones getServicioNotificaciones() {
