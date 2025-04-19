@@ -9,6 +9,7 @@ import um.prog2.usuario.Usuario;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,7 +29,7 @@ public class SistemaPrestamos {
     private final Map<String, Prestamo> prestamosActivos;
     private final List<Prestamo> historialPrestamos;
     private final ServicioNotificaciones servicioNotificaciones;
-    
+
     /**
      * Constructor del sistema de préstamos.
      * 
@@ -38,13 +39,13 @@ public class SistemaPrestamos {
         this.colaSolicitudes = new LinkedBlockingQueue<>();
         this.procesadorPrestamos = Executors.newSingleThreadExecutor();
         this.prestamosActivos = new ConcurrentHashMap<>();
-        this.historialPrestamos = new ArrayList<>();
+        this.historialPrestamos = Collections.synchronizedList(new ArrayList<>());
         this.servicioNotificaciones = servicioNotificaciones;
-        
+
         // Iniciar el procesador de solicitudes
         iniciarProcesador();
     }
-    
+
     /**
      * Inicia el procesador de solicitudes de préstamo.
      */
@@ -60,7 +61,7 @@ public class SistemaPrestamos {
             }
         });
     }
-    
+
     /**
      * Procesa una solicitud de préstamo.
      * 
@@ -68,6 +69,10 @@ public class SistemaPrestamos {
      */
     private void procesarSolicitud(SolicitudPrestamo solicitud) {
         try {
+            System.out.println("[CONCURRENCIA] Procesando solicitud de tipo " + solicitud.getTipo() + 
+                    " para usuario " + solicitud.getUsuario().getNombre() + 
+                    " en thread " + Thread.currentThread().getName());
+
             switch (solicitud.getTipo()) {
                 case PRESTAR:
                     realizarPrestamo(solicitud.getUsuario(), solicitud.getRecurso(), solicitud.getDiasPrestamo());
@@ -80,6 +85,7 @@ public class SistemaPrestamos {
                     break;
             }
         } catch (RecursoNoDisponibleException e) {
+            System.out.println("[CONCURRENCIA] Error al procesar solicitud: " + e.getMessage());
             // Notificar al usuario sobre el error
             servicioNotificaciones.enviarNotificacion(
                     "Error en solicitud de préstamo: " + e.getMessage(),
@@ -87,7 +93,7 @@ public class SistemaPrestamos {
             );
         }
     }
-    
+
     /**
      * Solicita un préstamo de un recurso para un usuario.
      * 
@@ -106,7 +112,7 @@ public class SistemaPrestamos {
         );
         colaSolicitudes.add(solicitud);
     }
-    
+
     /**
      * Solicita la devolución de un recurso.
      * 
@@ -123,7 +129,7 @@ public class SistemaPrestamos {
         );
         colaSolicitudes.add(solicitud);
     }
-    
+
     /**
      * Solicita la renovación de un préstamo.
      * 
@@ -141,7 +147,7 @@ public class SistemaPrestamos {
         );
         colaSolicitudes.add(solicitud);
     }
-    
+
     /**
      * Realiza un préstamo de un recurso a un usuario.
      * 
@@ -150,15 +156,21 @@ public class SistemaPrestamos {
      * @param diasPrestamo Duración del préstamo en días
      * @throws RecursoNoDisponibleException Si el recurso no está disponible
      */
-    private void realizarPrestamo(Usuario usuario, RecursoDigital recurso, int diasPrestamo) throws RecursoNoDisponibleException {
+    private synchronized void realizarPrestamo(Usuario usuario, RecursoDigital recurso, int diasPrestamo) throws RecursoNoDisponibleException {
+        System.out.println("[CONCURRENCIA] Iniciando préstamo para usuario " + usuario.getNombre() + 
+                " del recurso " + recurso.getIdentificador() + " en thread " + Thread.currentThread().getName());
+
         if (recurso.getEstado() != EstadoRecurso.DISPONIBLE) {
+            System.out.println("[CONCURRENCIA] Recurso no disponible: " + recurso.getIdentificador());
             throw new RecursoNoDisponibleException("El recurso no está disponible para préstamo");
         }
-        
+
         String idPrestamo = generarIdPrestamo();
         Prestamo prestamo = new Prestamo(idPrestamo, usuario, recurso, diasPrestamo);
         prestamosActivos.put(idPrestamo, prestamo);
-        
+
+        System.out.println("[CONCURRENCIA] Préstamo realizado con éxito: ID=" + idPrestamo);
+
         // Notificar al usuario
         servicioNotificaciones.enviarNotificacion(
                 "Préstamo realizado: " + recurso.getIdentificador() + 
@@ -166,34 +178,41 @@ public class SistemaPrestamos {
                 usuario
         );
     }
-    
+
     /**
      * Devuelve un recurso prestado.
      * 
      * @param idPrestamo Identificador del préstamo a devolver
      * @throws RecursoNoDisponibleException Si el préstamo no existe o ya fue devuelto
      */
-    private void devolverRecurso(String idPrestamo) throws RecursoNoDisponibleException {
+    private synchronized void devolverRecurso(String idPrestamo) throws RecursoNoDisponibleException {
+        System.out.println("[CONCURRENCIA] Iniciando devolución de préstamo ID=" + idPrestamo + 
+                " en thread " + Thread.currentThread().getName());
+
         Prestamo prestamo = prestamosActivos.get(idPrestamo);
         if (prestamo == null) {
+            System.out.println("[CONCURRENCIA] Préstamo no encontrado: " + idPrestamo);
             throw new RecursoNoDisponibleException("El préstamo no existe o ya fue devuelto");
         }
-        
+
         boolean devuelto = prestamo.devolver();
         if (devuelto) {
             prestamosActivos.remove(idPrestamo);
             historialPrestamos.add(prestamo);
-            
+
+            System.out.println("[CONCURRENCIA] Devolución realizada con éxito: ID=" + idPrestamo);
+
             // Notificar al usuario
             servicioNotificaciones.enviarNotificacion(
                     "Devolución realizada: " + prestamo.getRecurso().getIdentificador(),
                     prestamo.getUsuario()
             );
         } else {
+            System.out.println("[CONCURRENCIA] El préstamo ya fue devuelto: " + idPrestamo);
             throw new RecursoNoDisponibleException("El préstamo ya fue devuelto");
         }
     }
-    
+
     /**
      * Renueva un préstamo existente.
      * 
@@ -201,14 +220,20 @@ public class SistemaPrestamos {
      * @param diasExtension Días adicionales para el préstamo
      * @throws RecursoNoDisponibleException Si el préstamo no existe o ya fue devuelto
      */
-    private void renovarPrestamo(String idPrestamo, int diasExtension) throws RecursoNoDisponibleException {
+    private synchronized void renovarPrestamo(String idPrestamo, int diasExtension) throws RecursoNoDisponibleException {
+        System.out.println("[CONCURRENCIA] Iniciando renovación de préstamo ID=" + idPrestamo + 
+                " por " + diasExtension + " días en thread " + Thread.currentThread().getName());
+
         Prestamo prestamo = prestamosActivos.get(idPrestamo);
         if (prestamo == null) {
+            System.out.println("[CONCURRENCIA] Préstamo no encontrado: " + idPrestamo);
             throw new RecursoNoDisponibleException("El préstamo no existe o ya fue devuelto");
         }
-        
+
         boolean renovado = prestamo.renovar(diasExtension);
         if (renovado) {
+            System.out.println("[CONCURRENCIA] Renovación realizada con éxito: ID=" + idPrestamo);
+
             // Notificar al usuario
             servicioNotificaciones.enviarNotificacion(
                     "Renovación realizada: " + prestamo.getRecurso().getIdentificador() + 
@@ -216,10 +241,11 @@ public class SistemaPrestamos {
                     prestamo.getUsuario()
             );
         } else {
+            System.out.println("[CONCURRENCIA] El préstamo no puede ser renovado: " + idPrestamo);
             throw new RecursoNoDisponibleException("El préstamo no puede ser renovado");
         }
     }
-    
+
     /**
      * Genera un identificador único para un préstamo.
      * 
@@ -228,45 +254,63 @@ public class SistemaPrestamos {
     private String generarIdPrestamo() {
         return "P-" + UUID.randomUUID().toString().substring(0, 8);
     }
-    
+
     /**
      * Obtiene los préstamos activos de un usuario.
      * 
      * @param usuario Usuario del que se quieren obtener los préstamos
      * @return Lista de préstamos activos del usuario
      */
-    public List<Prestamo> obtenerPrestamosActivos(Usuario usuario) {
+    public synchronized List<Prestamo> obtenerPrestamosActivos(Usuario usuario) {
+        System.out.println("[CONCURRENCIA] Obteniendo préstamos activos para usuario " + usuario.getNombre() + 
+                " en thread " + Thread.currentThread().getName());
+
         List<Prestamo> prestamosUsuario = new ArrayList<>();
         for (Prestamo prestamo : prestamosActivos.values()) {
             if (prestamo.getUsuario().getID() == usuario.getID()) {
                 prestamosUsuario.add(prestamo);
             }
         }
+
+        System.out.println("[CONCURRENCIA] Préstamos activos obtenidos. Total: " + prestamosUsuario.size());
         return prestamosUsuario;
     }
-    
+
     /**
      * Obtiene el historial de préstamos de un usuario.
      * 
      * @param usuario Usuario del que se quiere obtener el historial
      * @return Lista con el historial de préstamos del usuario
      */
-    public List<Prestamo> obtenerHistorialPrestamos(Usuario usuario) {
+    public synchronized List<Prestamo> obtenerHistorialPrestamos(Usuario usuario) {
+        System.out.println("[CONCURRENCIA] Obteniendo historial de préstamos para usuario " + usuario.getNombre() + 
+                " en thread " + Thread.currentThread().getName());
+
         List<Prestamo> historialUsuario = new ArrayList<>();
-        for (Prestamo prestamo : historialPrestamos) {
-            if (prestamo.getUsuario().getID() == usuario.getID()) {
-                historialUsuario.add(prestamo);
+        synchronized (historialPrestamos) {
+            for (Prestamo prestamo : historialPrestamos) {
+                if (prestamo.getUsuario().getID() == usuario.getID()) {
+                    historialUsuario.add(prestamo);
+                }
             }
         }
+
+        System.out.println("[CONCURRENCIA] Historial obtenido. Total préstamos: " + historialUsuario.size());
         return historialUsuario;
     }
-    
+
     /**
      * Verifica si hay préstamos vencidos y notifica a los usuarios.
      */
-    public void verificarPrestamosVencidos() {
+    public synchronized void verificarPrestamosVencidos() {
+        System.out.println("[CONCURRENCIA] Verificando préstamos vencidos en thread " + Thread.currentThread().getName());
+        int contadorVencidos = 0;
+
         for (Prestamo prestamo : prestamosActivos.values()) {
             if (prestamo.estaVencido()) {
+                contadorVencidos++;
+                System.out.println("[CONCURRENCIA] Préstamo vencido encontrado: ID=" + prestamo.getId());
+
                 servicioNotificaciones.enviarNotificacion(
                         "Préstamo vencido: " + prestamo.getRecurso().getIdentificador() + 
                         ". Fecha de devolución: " + prestamo.getFechaDevolucion(),
@@ -274,15 +318,17 @@ public class SistemaPrestamos {
                 );
             }
         }
+
+        System.out.println("[CONCURRENCIA] Verificación completada. Préstamos vencidos: " + contadorVencidos);
     }
-    
+
     /**
      * Cierra el sistema de préstamos.
      */
     public void cerrar() {
         procesadorPrestamos.shutdown();
     }
-    
+
     /**
      * Enumeración que define los tipos de solicitudes de préstamo.
      */
@@ -291,7 +337,7 @@ public class SistemaPrestamos {
         DEVOLVER,
         RENOVAR
     }
-    
+
     /**
      * Clase interna que representa una solicitud de préstamo.
      */
@@ -301,7 +347,7 @@ public class SistemaPrestamos {
         private final RecursoDigital recurso;
         private final String idPrestamo;
         private final int diasPrestamo;
-        
+
         public SolicitudPrestamo(TipoSolicitud tipo, Usuario usuario, RecursoDigital recurso, 
                                 String idPrestamo, int diasPrestamo) {
             this.tipo = tipo;
@@ -310,23 +356,23 @@ public class SistemaPrestamos {
             this.idPrestamo = idPrestamo;
             this.diasPrestamo = diasPrestamo;
         }
-        
+
         public TipoSolicitud getTipo() {
             return tipo;
         }
-        
+
         public Usuario getUsuario() {
             return usuario;
         }
-        
+
         public RecursoDigital getRecurso() {
             return recurso;
         }
-        
+
         public String getIdPrestamo() {
             return idPrestamo;
         }
-        
+
         public int getDiasPrestamo() {
             return diasPrestamo;
         }
