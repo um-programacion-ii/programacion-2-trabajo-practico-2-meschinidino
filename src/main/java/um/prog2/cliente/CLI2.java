@@ -2,10 +2,12 @@
 package um.prog2.cliente;
 
 import um.prog2.Enums.EstadoRecurso;
+import um.prog2.cliente.prestamos.GestorPrestamosConsola;
 import um.prog2.cliente.utilsRecursosCLI.BuscadorRecursos;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.ServicioNotificaciones;
 import um.prog2.notificaciones.ServicioNotificacionesEmail;
+import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.recursoDigital.*;
 import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
@@ -25,12 +27,16 @@ public class CLI2 {
     private static GestorUsuarioConsola gestorUsuario;
     private static GestorRecursosConsola gestorRecursos;
     private static BuscadorRecursos buscadorRecursos;
+    private static SistemaPrestamos sistemaPrestamos;
+    private static GestorPrestamosConsola gestorPrestamos;
 
     public static void main(String[] args) {
         // Inicializar gestores
         gestorUsuario = new GestorUsuarioConsola(scanner, usuarios, servicioNotificaciones);
         gestorRecursos = new GestorRecursosConsola(scanner, recursos, servicioNotificaciones);
         buscadorRecursos = new BuscadorRecursos(scanner, recursos);
+        sistemaPrestamos = new SistemaPrestamos(servicioNotificaciones);
+        gestorPrestamos = new GestorPrestamosConsola(scanner, sistemaPrestamos, recursos);
 
         cargarDatosDePrueba();
 
@@ -41,8 +47,10 @@ public class CLI2 {
             switch (opcion) {
                 case "1": gestionUsuarios(); break;
                 case "2": gestionRecursos(); break;
-                case "3":
+                case "3": gestionPrestamos(); break;
+                case "4":
                     System.out.println("¡Gracias por usar el sistema!");
+                    sistemaPrestamos.cerrar();
                     scanner.close();
                     return;
                 default:
@@ -56,7 +64,8 @@ public class CLI2 {
         mostrarUsuarioActual();
         System.out.println("1. Gestión de usuarios");
         System.out.println("2. Gestión de recursos");
-        System.out.println("3. Salir");
+        System.out.println("3. Gestión de préstamos");
+        System.out.println("4. Salir");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -94,6 +103,16 @@ public class CLI2 {
                 default: System.out.println("Opción no válida. Intente de nuevo.");
             }
         }
+    }
+
+    // === GESTIÓN DE PRÉSTAMOS ===
+    private static void gestionPrestamos() {
+        if (usuarioActual == null) {
+            System.out.println("Debe seleccionar un usuario primero");
+            return;
+        }
+
+        gestorPrestamos.mostrarMenuPrestamos(usuarioActual);
     }
 
     // === GESTIÓN DE RECURSOS ===
