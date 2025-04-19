@@ -3,6 +3,7 @@ package um.prog2.cliente;
 
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.cliente.prestamos.GestorPrestamosConsola;
+import um.prog2.cliente.reportes.GestorReportesConsola;
 import um.prog2.cliente.reservas.GestorReservasConsola;
 import um.prog2.cliente.utilsRecursosCLI.BuscadorRecursos;
 import um.prog2.interfaces.RecursoDigital;
@@ -14,6 +15,7 @@ import um.prog2.notificaciones.ServicioNotificacionesEmail;
 import um.prog2.notificaciones.ServicioNotificacionesSMS;
 import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.recursoDigital.*;
+import um.prog2.reportes.SistemaReportes;
 import um.prog2.usuario.GestorUsuario;
 import um.prog2.usuario.Usuario;
 import um.prog2.cliente.utilsRecursosCLI.GestorRecursosConsola;
@@ -36,6 +38,8 @@ public class CLI2 {
     private static SistemaPrestamos sistemaPrestamos;
     private static GestorPrestamosConsola gestorPrestamos;
     private static GestorReservasConsola gestorReservas;
+    private static SistemaReportes sistemaReportes;
+    private static GestorReportesConsola gestorReportes;
 
     public static void main(String[] args) {
         // Inicializar sistema de notificaciones
@@ -56,6 +60,10 @@ public class CLI2 {
         gestorPrestamos = new GestorPrestamosConsola(scanner, sistemaPrestamos, recursos);
         gestorReservas = new GestorReservasConsola(servicioNotificaciones, sistemaPrestamos);
 
+        // Inicializar sistema de reportes
+        sistemaReportes = new SistemaReportes(sistemaPrestamos, recursos, usuarios);
+        gestorReportes = new GestorReportesConsola(scanner, sistemaReportes);
+
         cargarDatosDePrueba();
 
         while (true) {
@@ -68,7 +76,8 @@ public class CLI2 {
                 case "3": gestionPrestamos(); break;
                 case "4": gestionReservas(); break;
                 case "5": verNotificaciones(); break;
-                case "6":
+                case "6": gestionReportes(); break;
+                case "7":
                     System.out.println("¡Gracias por usar el sistema!");
                     sistemaPrestamos.cerrar();
                     gestorReservas.cerrar();
@@ -89,7 +98,8 @@ public class CLI2 {
         System.out.println("3. Gestión de préstamos");
         System.out.println("4. Gestión de reservas");
         System.out.println("5. Ver notificaciones");
-        System.out.println("6. Salir");
+        System.out.println("6. Reportes y estadísticas");
+        System.out.println("7. Salir");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -183,6 +193,11 @@ public class CLI2 {
 
         System.out.println("\nPresione Enter para continuar...");
         scanner.nextLine();
+    }
+
+    // === GESTIÓN DE REPORTES ===
+    private static void gestionReportes() {
+        gestorReportes.mostrarMenuReportes();
     }
 
     // === GESTIÓN DE RECURSOS ===
