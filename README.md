@@ -392,3 +392,10 @@ El uso inadecuado de IA puede resultar en:
 ## 📝 Licencia
 
 Este trabajo es parte del curso de Programación Avanzada de Ingeniería en Informática. Uso educativo únicamente.
+
+
+## Uso de Inteligencia Artificial en este proyecto:
+- Los tests se agregaron utilizando Junie para manejar la integración de nuevas partes al proyecto sin que explote todo
+- Se utiliza Junie también para agregar el sistema de préstamos y reservas
+- Más info sobre Junie https://www.jetbrains.com/junie/
+- Con eso me quedé sin tokens (:

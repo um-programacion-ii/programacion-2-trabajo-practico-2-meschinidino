@@ -3,6 +3,7 @@ package um.prog2.cliente;
 
 import um.prog2.Enums.EstadoRecurso;
 import um.prog2.cliente.prestamos.GestorPrestamosConsola;
+import um.prog2.cliente.reservas.GestorReservasConsola;
 import um.prog2.cliente.utilsRecursosCLI.BuscadorRecursos;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.ServicioNotificaciones;
@@ -29,6 +30,7 @@ public class CLI2 {
     private static BuscadorRecursos buscadorRecursos;
     private static SistemaPrestamos sistemaPrestamos;
     private static GestorPrestamosConsola gestorPrestamos;
+    private static GestorReservasConsola gestorReservas;
 
     public static void main(String[] args) {
         // Inicializar gestores
@@ -37,6 +39,7 @@ public class CLI2 {
         buscadorRecursos = new BuscadorRecursos(scanner, recursos);
         sistemaPrestamos = new SistemaPrestamos(servicioNotificaciones);
         gestorPrestamos = new GestorPrestamosConsola(scanner, sistemaPrestamos, recursos);
+        gestorReservas = new GestorReservasConsola(servicioNotificaciones, sistemaPrestamos);
 
         cargarDatosDePrueba();
 
@@ -48,9 +51,11 @@ public class CLI2 {
                 case "1": gestionUsuarios(); break;
                 case "2": gestionRecursos(); break;
                 case "3": gestionPrestamos(); break;
-                case "4":
+                case "4": gestionReservas(); break;
+                case "5":
                     System.out.println("¡Gracias por usar el sistema!");
                     sistemaPrestamos.cerrar();
+                    gestorReservas.cerrar();
                     scanner.close();
                     return;
                 default:
@@ -65,7 +70,8 @@ public class CLI2 {
         System.out.println("1. Gestión de usuarios");
         System.out.println("2. Gestión de recursos");
         System.out.println("3. Gestión de préstamos");
-        System.out.println("4. Salir");
+        System.out.println("4. Gestión de reservas");
+        System.out.println("5. Salir");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -113,6 +119,19 @@ public class CLI2 {
         }
 
         gestorPrestamos.mostrarMenuPrestamos(usuarioActual);
+    }
+
+    // === GESTIÓN DE RESERVAS ===
+    private static void gestionReservas() {
+        if (usuarioActual == null) {
+            System.out.println("Debe seleccionar un usuario primero");
+            return;
+        }
+
+        boolean volverAlMenuPrincipal = false;
+        while (!volverAlMenuPrincipal) {
+            volverAlMenuPrincipal = gestorReservas.mostrarMenuReservas(usuarioActual);
+        }
     }
 
     // === GESTIÓN DE RECURSOS ===
