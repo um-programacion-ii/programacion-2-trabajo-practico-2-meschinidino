@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Servicio para el envío asincrónico de notificaciones utilizando ExecutorService.
  * Implementa la interfaz ServicioNotificaciones para permitir un sistema unificado.
+ * Soporta configuración de preferencias de notificación y diferentes niveles de urgencia.
  */
 public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
     private final BlockingQueue<Notificacion> colaNotificaciones;
@@ -20,6 +21,7 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
     private final List<ServicioNotificaciones> serviciosNotificacion;
     private final List<Notificacion> historialNotificaciones;
     private boolean mostrarEnConsola;
+    private ConfiguracionNotificaciones configuracionNotificaciones;
 
     /**
      * Constructor del servicio de envío de notificaciones.
@@ -30,6 +32,24 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
         this.serviciosNotificacion = new ArrayList<>();
         this.historialNotificaciones = new ArrayList<>();
         this.mostrarEnConsola = true;
+        this.configuracionNotificaciones = new ConfiguracionNotificaciones();
+
+        // Iniciar el procesador de notificaciones
+        iniciarProcesador();
+    }
+
+    /**
+     * Constructor del servicio de envío de notificaciones con configuración personalizada.
+     * 
+     * @param configuracionNotificaciones Configuración de preferencias de notificación
+     */
+    public ServicioEnvioNotificaciones(ConfiguracionNotificaciones configuracionNotificaciones) {
+        this.colaNotificaciones = new LinkedBlockingQueue<>();
+        this.procesadorNotificaciones = Executors.newSingleThreadExecutor();
+        this.serviciosNotificacion = new ArrayList<>();
+        this.historialNotificaciones = new ArrayList<>();
+        this.mostrarEnConsola = true;
+        this.configuracionNotificaciones = configuracionNotificaciones;
 
         // Iniciar el procesador de notificaciones
         iniciarProcesador();
@@ -52,22 +72,49 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
     }
 
     /**
-     * Procesa una notificación enviándola a través de todos los servicios registrados.
+     * Procesa una notificación enviándola a través de todos los servicios registrados,
+     * respetando las preferencias de notificación del usuario.
      * 
      * @param notificacion La notificación a procesar
      */
     private void procesarNotificacion(Notificacion notificacion) {
-        // Guardar en el historial
+        // Guardar en el historial (siempre se guarda, independientemente de las preferencias)
         historialNotificaciones.add(notificacion);
 
-        // Mostrar en consola si está habilitado
-        if (mostrarEnConsola) {
+        Usuario usuario = notificacion.getDestinatario();
+
+        // Mostrar en consola si está habilitado y el usuario tiene habilitado este canal
+        if (mostrarEnConsola && 
+            configuracionNotificaciones.debeEnviarNotificacion(notificacion, 
+                ConfiguracionNotificaciones.CanalNotificacion.CONSOLA)) {
             System.out.println("NOTIFICACIÓN: " + notificacion);
         }
 
-        // Enviar a través de todos los servicios registrados
+        // Enviar a través de los servicios registrados según las preferencias del usuario
         for (ServicioNotificaciones servicio : serviciosNotificacion) {
-            servicio.enviarNotificacion(notificacion.getMensaje(), notificacion.getDestinatario());
+            // Determinar el canal según el tipo de servicio
+            ConfiguracionNotificaciones.CanalNotificacion canal = determinarCanalServicio(servicio);
+
+            // Verificar si el usuario tiene habilitado este canal para este tipo y nivel de notificación
+            if (configuracionNotificaciones.debeEnviarNotificacion(notificacion, canal)) {
+                servicio.enviarNotificacion(notificacion.getMensaje(), usuario);
+            }
+        }
+    }
+
+    /**
+     * Determina el canal de notificación según el tipo de servicio.
+     * 
+     * @param servicio Servicio de notificaciones
+     * @return Canal de notificación correspondiente
+     */
+    private ConfiguracionNotificaciones.CanalNotificacion determinarCanalServicio(ServicioNotificaciones servicio) {
+        if (servicio instanceof ServicioNotificacionesEmail) {
+            return ConfiguracionNotificaciones.CanalNotificacion.EMAIL;
+        } else if (servicio instanceof ServicioNotificacionesSMS) {
+            return ConfiguracionNotificaciones.CanalNotificacion.SMS;
+        } else {
+            return ConfiguracionNotificaciones.CanalNotificacion.CONSOLA;
         }
     }
 
@@ -111,8 +158,26 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
                                           Notificacion.TipoNotificacion tipo,
                                           um.prog2.interfaces.RecursoDigital recurso, 
                                           String idPrestamo) {
+        enviarNotificacionPrestamo(mensaje, usuario, tipo, recurso, idPrestamo, Notificacion.NivelUrgencia.INFO);
+    }
+
+    /**
+     * Envía una notificación de préstamo con nivel de urgencia.
+     * 
+     * @param mensaje Mensaje de la notificación
+     * @param usuario Usuario destinatario
+     * @param tipo Tipo de notificación
+     * @param recurso Recurso relacionado
+     * @param idPrestamo ID del préstamo
+     * @param nivelUrgencia Nivel de urgencia de la notificación
+     */
+    public void enviarNotificacionPrestamo(String mensaje, Usuario usuario, 
+                                          Notificacion.TipoNotificacion tipo,
+                                          um.prog2.interfaces.RecursoDigital recurso, 
+                                          String idPrestamo,
+                                          Notificacion.NivelUrgencia nivelUrgencia) {
         NotificacionPrestamo notificacion = new NotificacionPrestamo(
-                mensaje, usuario, tipo, recurso, idPrestamo);
+                mensaje, usuario, tipo, recurso, idPrestamo, nivelUrgencia);
         enviarNotificacion(notificacion);
     }
 
@@ -130,8 +195,27 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
                                          Notificacion.TipoNotificacion tipo,
                                          um.prog2.interfaces.RecursoDigital recurso, 
                                          String idReserva, int prioridad) {
+        enviarNotificacionReserva(mensaje, usuario, tipo, recurso, idReserva, prioridad, Notificacion.NivelUrgencia.INFO);
+    }
+
+    /**
+     * Envía una notificación de reserva con nivel de urgencia.
+     * 
+     * @param mensaje Mensaje de la notificación
+     * @param usuario Usuario destinatario
+     * @param tipo Tipo de notificación
+     * @param recurso Recurso relacionado
+     * @param idReserva ID de la reserva
+     * @param prioridad Prioridad de la reserva
+     * @param nivelUrgencia Nivel de urgencia de la notificación
+     */
+    public void enviarNotificacionReserva(String mensaje, Usuario usuario, 
+                                         Notificacion.TipoNotificacion tipo,
+                                         um.prog2.interfaces.RecursoDigital recurso, 
+                                         String idReserva, int prioridad,
+                                         Notificacion.NivelUrgencia nivelUrgencia) {
         NotificacionReserva notificacion = new NotificacionReserva(
-                mensaje, usuario, tipo, recurso, idReserva, prioridad);
+                mensaje, usuario, tipo, recurso, idReserva, prioridad, nivelUrgencia);
         enviarNotificacion(notificacion);
     }
 
@@ -146,8 +230,24 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
     public void enviarNotificacionSistema(String mensaje, Usuario usuario, 
                                          Notificacion.TipoNotificacion tipo,
                                          String origen) {
+        enviarNotificacionSistema(mensaje, usuario, tipo, origen, Notificacion.NivelUrgencia.INFO);
+    }
+
+    /**
+     * Envía una notificación del sistema con nivel de urgencia.
+     * 
+     * @param mensaje Mensaje de la notificación
+     * @param usuario Usuario destinatario
+     * @param tipo Tipo de notificación
+     * @param origen Origen de la notificación
+     * @param nivelUrgencia Nivel de urgencia de la notificación
+     */
+    public void enviarNotificacionSistema(String mensaje, Usuario usuario, 
+                                         Notificacion.TipoNotificacion tipo,
+                                         String origen,
+                                         Notificacion.NivelUrgencia nivelUrgencia) {
         NotificacionSistema notificacion = new NotificacionSistema(
-                mensaje, usuario, tipo, origen);
+                mensaje, usuario, tipo, origen, nivelUrgencia);
         enviarNotificacion(notificacion);
     }
 
@@ -167,6 +267,33 @@ public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
      */
     public List<Notificacion> getHistorialNotificaciones() {
         return new ArrayList<>(historialNotificaciones);
+    }
+
+    /**
+     * Obtiene la configuración de notificaciones.
+     * 
+     * @return Configuración de notificaciones
+     */
+    public ConfiguracionNotificaciones getConfiguracionNotificaciones() {
+        return configuracionNotificaciones;
+    }
+
+    /**
+     * Establece la configuración de notificaciones.
+     * 
+     * @param configuracionNotificaciones Nueva configuración de notificaciones
+     */
+    public void setConfiguracionNotificaciones(ConfiguracionNotificaciones configuracionNotificaciones) {
+        this.configuracionNotificaciones = configuracionNotificaciones;
+    }
+
+    /**
+     * Inicializa las preferencias por defecto para un usuario.
+     * 
+     * @param usuario Usuario a inicializar
+     */
+    public void inicializarPreferenciasUsuario(Usuario usuario) {
+        configuracionNotificaciones.inicializarPreferenciasDefecto(usuario);
     }
 
     /**

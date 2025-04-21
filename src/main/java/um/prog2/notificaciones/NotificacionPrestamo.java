@@ -21,7 +21,22 @@ public class NotificacionPrestamo extends Notificacion {
      */
     public NotificacionPrestamo(String mensaje, Usuario destinatario, TipoNotificacion tipo, 
                                RecursoDigital recurso, String idPrestamo) {
-        super(mensaje, destinatario, tipo);
+        this(mensaje, destinatario, tipo, recurso, idPrestamo, NivelUrgencia.INFO);
+    }
+
+    /**
+     * Constructor para crear una notificación de préstamo con nivel de urgencia.
+     * 
+     * @param mensaje Mensaje de la notificación
+     * @param destinatario Usuario destinatario de la notificación
+     * @param tipo Tipo de notificación
+     * @param recurso Recurso relacionado con el préstamo
+     * @param idPrestamo Identificador del préstamo
+     * @param nivelUrgencia Nivel de urgencia de la notificación
+     */
+    public NotificacionPrestamo(String mensaje, Usuario destinatario, TipoNotificacion tipo, 
+                               RecursoDigital recurso, String idPrestamo, NivelUrgencia nivelUrgencia) {
+        super(mensaje, destinatario, tipo, nivelUrgencia);
         this.recurso = recurso;
         this.idPrestamo = idPrestamo;
     }
