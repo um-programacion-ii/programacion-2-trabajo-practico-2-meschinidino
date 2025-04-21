@@ -10,9 +10,9 @@ import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.ServicioNotificaciones;
 import um.prog2.notificaciones.Notificacion;
 import um.prog2.notificaciones.ServicioEnvioNotificaciones;
-import um.prog2.notificaciones.ServicioNotificacionesAdapter;
 import um.prog2.notificaciones.ServicioNotificacionesEmail;
 import um.prog2.notificaciones.ServicioNotificacionesSMS;
+import um.prog2.alertas.AlertaVencimiento;
 import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.recursoDigital.*;
 import um.prog2.reportes.SistemaReportes;
@@ -40,6 +40,7 @@ public class CLI2 {
     private static GestorReservasConsola gestorReservas;
     private static SistemaReportes sistemaReportes;
     private static GestorReportesConsola gestorReportes;
+    private static AlertaVencimiento alertaVencimiento;
 
     public static void main(String[] args) {
         // Inicializar sistema de notificaciones
@@ -49,8 +50,8 @@ public class CLI2 {
         servicioEnvioNotificaciones.registrarServicio(servicioEmail);
         servicioEnvioNotificaciones.registrarServicio(servicioSMS);
 
-        // Crear adaptador para compatibilidad con la interfaz ServicioNotificaciones
-        servicioNotificaciones = new ServicioNotificacionesAdapter(servicioEnvioNotificaciones, "Sistema");
+        // Usar directamente el servicio de envío como implementación de ServicioNotificaciones
+        servicioNotificaciones = servicioEnvioNotificaciones;
 
         // Inicializar gestores
         gestorUsuario = new GestorUsuarioConsola(scanner, usuarios, servicioNotificaciones);
@@ -63,6 +64,10 @@ public class CLI2 {
         // Inicializar sistema de reportes
         sistemaReportes = new SistemaReportes(sistemaPrestamos, recursos, usuarios);
         gestorReportes = new GestorReportesConsola(scanner, sistemaReportes);
+
+        // Inicializar y arrancar el sistema de alertas de vencimiento
+        alertaVencimiento = new AlertaVencimiento(sistemaPrestamos, servicioEnvioNotificaciones);
+        alertaVencimiento.iniciarMonitoreo(5); // Verificar cada 5 minutos
 
         cargarDatosDePrueba();
 
@@ -81,6 +86,7 @@ public class CLI2 {
                     System.out.println("¡Gracias por usar el sistema!");
                     sistemaPrestamos.cerrar();
                     gestorReservas.cerrar();
+                    alertaVencimiento.detenerMonitoreo();
                     servicioEnvioNotificaciones.cerrar();
                     scanner.close();
                     return;
@@ -180,19 +186,57 @@ public class CLI2 {
 
         System.out.println("Notificaciones para " + usuarioActual.getNombre() + " " + usuarioActual.getApellido() + ":");
 
-        int contador = 0;
+        // Filtrar notificaciones del usuario actual
+        List<Notificacion> notificacionesUsuario = new ArrayList<>();
         for (Notificacion notificacion : historial) {
             if (notificacion.getDestinatario().getID() == usuarioActual.getID()) {
-                System.out.println((++contador) + ". " + notificacion);
+                notificacionesUsuario.add(notificacion);
             }
         }
 
-        if (contador == 0) {
+        if (notificacionesUsuario.isEmpty()) {
             System.out.println("No hay notificaciones para este usuario");
+            System.out.println("\nPresione Enter para continuar...");
+            scanner.nextLine();
+            return;
         }
 
-        System.out.println("\nPresione Enter para continuar...");
-        scanner.nextLine();
+        // Mostrar notificaciones
+        int contador = 0;
+        for (Notificacion notificacion : notificacionesUsuario) {
+            System.out.println((++contador) + ". " + notificacion);
+        }
+
+        // Verificar si hay alertas de vencimiento
+        boolean hayAlertas = false;
+        for (Notificacion notificacion : notificacionesUsuario) {
+            if (notificacion.getTipo() == Notificacion.TipoNotificacion.VENCIMIENTO) {
+                hayAlertas = true;
+                break;
+            }
+        }
+
+        if (hayAlertas) {
+            System.out.println("\nPara renovar un préstamo, escriba 'RENOVAR' seguido del ID del préstamo");
+            System.out.println("Por ejemplo: RENOVAR P-12345");
+            System.out.println("O presione Enter para volver al menú principal");
+
+            String respuesta = scanner.nextLine().trim();
+
+            if (respuesta.startsWith("RENOVAR")) {
+                boolean resultado = alertaVencimiento.procesarRespuestaAlerta(respuesta, usuarioActual);
+                if (resultado) {
+                    System.out.println("Préstamo renovado con éxito");
+                } else {
+                    System.out.println("No se pudo renovar el préstamo. Verifique el ID e intente nuevamente.");
+                }
+                System.out.println("\nPresione Enter para continuar...");
+                scanner.nextLine();
+            }
+        } else {
+            System.out.println("\nPresione Enter para continuar...");
+            scanner.nextLine();
+        }
     }
 
     // === GESTIÓN DE REPORTES ===
