@@ -13,6 +13,7 @@ import um.prog2.notificaciones.ServicioEnvioNotificaciones;
 import um.prog2.notificaciones.ServicioNotificacionesEmail;
 import um.prog2.notificaciones.ServicioNotificacionesSMS;
 import um.prog2.alertas.AlertaVencimiento;
+import um.prog2.alertas.AlertaDisponibilidad;
 import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.recursoDigital.*;
 import um.prog2.reportes.SistemaReportes;
@@ -22,6 +23,7 @@ import um.prog2.cliente.utilsRecursosCLI.GestorRecursosConsola;
 import um.prog2.cliente.utilsUsuariosCLI.GestorUsuarioConsola;
 
 import java.util.*;
+import java.util.List;
 
 public class CLI2 {
     private static final Scanner scanner = new Scanner(System.in);
@@ -41,6 +43,7 @@ public class CLI2 {
     private static SistemaReportes sistemaReportes;
     private static GestorReportesConsola gestorReportes;
     private static AlertaVencimiento alertaVencimiento;
+    private static AlertaDisponibilidad alertaDisponibilidad;
 
     public static void main(String[] args) {
         // Inicializar sistema de notificaciones
@@ -69,6 +72,15 @@ public class CLI2 {
         alertaVencimiento = new AlertaVencimiento(sistemaPrestamos, servicioEnvioNotificaciones);
         alertaVencimiento.iniciarMonitoreo(5); // Verificar cada 5 minutos
 
+        // Inicializar y arrancar el sistema de alertas de disponibilidad
+        alertaDisponibilidad = new AlertaDisponibilidad(
+            gestorReservas.getSistemaReservas(), 
+            sistemaPrestamos, 
+            gestorRecursos.getGestorRecursos(), 
+            servicioEnvioNotificaciones
+        );
+        alertaDisponibilidad.iniciarMonitoreo(5); // Verificar cada 5 minutos
+
         cargarDatosDePrueba();
 
         while (true) {
@@ -82,11 +94,13 @@ public class CLI2 {
                 case "4": gestionReservas(); break;
                 case "5": verNotificaciones(); break;
                 case "6": gestionReportes(); break;
-                case "7":
+                case "7": verRecursosDisponiblesConReservas(); break;
+                case "8":
                     System.out.println("¡Gracias por usar el sistema!");
                     sistemaPrestamos.cerrar();
                     gestorReservas.cerrar();
                     alertaVencimiento.detenerMonitoreo();
+                    alertaDisponibilidad.detenerMonitoreo();
                     servicioEnvioNotificaciones.cerrar();
                     scanner.close();
                     return;
@@ -105,7 +119,8 @@ public class CLI2 {
         System.out.println("4. Gestión de reservas");
         System.out.println("5. Ver notificaciones");
         System.out.println("6. Reportes y estadísticas");
-        System.out.println("7. Salir");
+        System.out.println("7. Ver recursos disponibles con reservas");
+        System.out.println("8. Salir");
         System.out.print("Seleccione una opción: ");
     }
 
@@ -242,6 +257,52 @@ public class CLI2 {
     // === GESTIÓN DE REPORTES ===
     private static void gestionReportes() {
         gestorReportes.mostrarMenuReportes();
+    }
+
+    /**
+     * Muestra los recursos disponibles que tienen reservas activas.
+     */
+    private static void verRecursosDisponiblesConReservas() {
+        System.out.println("\n===== RECURSOS DISPONIBLES CON RESERVAS =====");
+
+        List<RecursoDigital> recursosDisponibles = alertaDisponibilidad.obtenerRecursosDisponiblesConReservas();
+
+        if (recursosDisponibles.isEmpty()) {
+            System.out.println("No hay recursos disponibles con reservas activas.");
+            return;
+        }
+
+        System.out.println("Los siguientes recursos están disponibles y tienen reservas activas:");
+        for (RecursoDigital recurso : recursosDisponibles) {
+            System.out.println("- " + recurso.getIdentificador() + ": " + 
+                              gestorRecursos.getGestorRecursos().getTitulo(recurso));
+        }
+
+        if (usuarioActual != null) {
+            System.out.println("\n¿Desea tomar alguno de estos recursos en préstamo? (S/N)");
+            String respuesta = scanner.nextLine();
+
+            if (respuesta.equalsIgnoreCase("S")) {
+                System.out.print("Ingrese el identificador del recurso: ");
+                String idRecurso = scanner.nextLine();
+
+                System.out.print("Ingrese la duración del préstamo en días: ");
+                int diasPrestamo = scanner.nextInt();
+                scanner.nextLine(); // Consumir el salto de línea
+
+                // Procesar como si fuera una respuesta a una alerta
+                String comandoPrestamo = "PRESTAR " + idRecurso;
+                boolean resultado = alertaDisponibilidad.procesarRespuestaAlerta(comandoPrestamo, usuarioActual);
+
+                if (resultado) {
+                    System.out.println("Préstamo realizado con éxito.");
+                } else {
+                    System.out.println("No se pudo realizar el préstamo.");
+                }
+            }
+        } else {
+            System.out.println("Debe seleccionar un usuario para poder tomar recursos en préstamo.");
+        }
     }
 
     // === GESTIÓN DE RECURSOS ===
