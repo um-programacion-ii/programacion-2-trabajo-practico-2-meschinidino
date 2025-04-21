@@ -267,4 +267,13 @@ public class GestorReservasConsola {
     public void cerrar() {
         sistemaReservas.cerrar();
     }
+
+    /**
+     * Obtiene el sistema de reservas.
+     * 
+     * @return Sistema de reservas
+     */
+    public SistemaReservas getSistemaReservas() {
+        return sistemaReservas;
+    }
 }
