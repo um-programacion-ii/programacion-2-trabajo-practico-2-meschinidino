@@ -323,6 +323,21 @@ public class SistemaPrestamos {
     }
 
     /**
+     * Obtiene todos los préstamos activos en el sistema.
+     * 
+     * @return Lista con todos los préstamos activos
+     */
+    public synchronized List<Prestamo> obtenerTodosPrestamosActivos() {
+        System.out.println("[CONCURRENCIA] Obteniendo todos los préstamos activos en thread " + 
+                Thread.currentThread().getName());
+
+        List<Prestamo> todosLosPrestamos = new ArrayList<>(prestamosActivos.values());
+
+        System.out.println("[CONCURRENCIA] Total de préstamos activos: " + todosLosPrestamos.size());
+        return todosLosPrestamos;
+    }
+
+    /**
      * Cierra el sistema de préstamos.
      */
     public void cerrar() {

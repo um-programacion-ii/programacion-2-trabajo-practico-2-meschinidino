@@ -12,14 +12,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Servicio para el envío asincrónico de notificaciones utilizando ExecutorService.
+ * Implementa la interfaz ServicioNotificaciones para permitir un sistema unificado.
  */
-public class ServicioEnvioNotificaciones {
+public class ServicioEnvioNotificaciones implements ServicioNotificaciones {
     private final BlockingQueue<Notificacion> colaNotificaciones;
     private final ExecutorService procesadorNotificaciones;
     private final List<ServicioNotificaciones> serviciosNotificacion;
     private final List<Notificacion> historialNotificaciones;
     private boolean mostrarEnConsola;
-    
+
     /**
      * Constructor del servicio de envío de notificaciones.
      */
@@ -29,11 +30,11 @@ public class ServicioEnvioNotificaciones {
         this.serviciosNotificacion = new ArrayList<>();
         this.historialNotificaciones = new ArrayList<>();
         this.mostrarEnConsola = true;
-        
+
         // Iniciar el procesador de notificaciones
         iniciarProcesador();
     }
-    
+
     /**
      * Inicia el procesador de notificaciones.
      */
@@ -49,7 +50,7 @@ public class ServicioEnvioNotificaciones {
             }
         });
     }
-    
+
     /**
      * Procesa una notificación enviándola a través de todos los servicios registrados.
      * 
@@ -58,18 +59,18 @@ public class ServicioEnvioNotificaciones {
     private void procesarNotificacion(Notificacion notificacion) {
         // Guardar en el historial
         historialNotificaciones.add(notificacion);
-        
+
         // Mostrar en consola si está habilitado
         if (mostrarEnConsola) {
             System.out.println("NOTIFICACIÓN: " + notificacion);
         }
-        
+
         // Enviar a través de todos los servicios registrados
         for (ServicioNotificaciones servicio : serviciosNotificacion) {
             servicio.enviarNotificacion(notificacion.getMensaje(), notificacion.getDestinatario());
         }
     }
-    
+
     /**
      * Registra un servicio de notificaciones.
      * 
@@ -78,7 +79,7 @@ public class ServicioEnvioNotificaciones {
     public void registrarServicio(ServicioNotificaciones servicio) {
         serviciosNotificacion.add(servicio);
     }
-    
+
     /**
      * Elimina un servicio de notificaciones.
      * 
@@ -87,7 +88,7 @@ public class ServicioEnvioNotificaciones {
     public void eliminarServicio(ServicioNotificaciones servicio) {
         serviciosNotificacion.remove(servicio);
     }
-    
+
     /**
      * Envía una notificación.
      * 
@@ -96,7 +97,7 @@ public class ServicioEnvioNotificaciones {
     public void enviarNotificacion(Notificacion notificacion) {
         colaNotificaciones.add(notificacion);
     }
-    
+
     /**
      * Envía una notificación de préstamo.
      * 
@@ -114,7 +115,7 @@ public class ServicioEnvioNotificaciones {
                 mensaje, usuario, tipo, recurso, idPrestamo);
         enviarNotificacion(notificacion);
     }
-    
+
     /**
      * Envía una notificación de reserva.
      * 
@@ -133,7 +134,7 @@ public class ServicioEnvioNotificaciones {
                 mensaje, usuario, tipo, recurso, idReserva, prioridad);
         enviarNotificacion(notificacion);
     }
-    
+
     /**
      * Envía una notificación del sistema.
      * 
@@ -149,7 +150,7 @@ public class ServicioEnvioNotificaciones {
                 mensaje, usuario, tipo, origen);
         enviarNotificacion(notificacion);
     }
-    
+
     /**
      * Habilita o deshabilita la visualización de notificaciones en consola.
      * 
@@ -158,7 +159,7 @@ public class ServicioEnvioNotificaciones {
     public void setMostrarEnConsola(boolean mostrar) {
         this.mostrarEnConsola = mostrar;
     }
-    
+
     /**
      * Obtiene el historial de notificaciones.
      * 
@@ -167,7 +168,24 @@ public class ServicioEnvioNotificaciones {
     public List<Notificacion> getHistorialNotificaciones() {
         return new ArrayList<>(historialNotificaciones);
     }
-    
+
+    /**
+     * Implementación del método de la interfaz ServicioNotificaciones.
+     * Envía una notificación simple del sistema.
+     * 
+     * @param mensaje Mensaje de la notificación
+     * @param usuario Usuario destinatario
+     */
+    @Override
+    public void enviarNotificacion(String mensaje, Usuario usuario) {
+        enviarNotificacionSistema(
+            mensaje,
+            usuario,
+            Notificacion.TipoNotificacion.SISTEMA,
+            "Sistema"
+        );
+    }
+
     /**
      * Cierra el servicio de envío de notificaciones.
      */
