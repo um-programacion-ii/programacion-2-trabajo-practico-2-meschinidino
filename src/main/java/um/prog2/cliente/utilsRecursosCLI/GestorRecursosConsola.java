@@ -192,6 +192,15 @@ public class GestorRecursosConsola {
     }
 
     /**
+     * Obtiene el gestor de recursos.
+     * 
+     * @return Gestor de recursos
+     */
+    public GestorRecursos getGestorRecursos() {
+        return gestorRecursos;
+    }
+
+    /**
      * Muestra la lista de todos los recursos registrados.
      */
     public void listarRecursos() {
