@@ -44,8 +44,8 @@ class SistemaReportesTest {
 
         // Crear usuarios de prueba
         usuarios = new HashMap<>();
-        usuario1 = new Usuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
-        usuario2 = new Usuario("María", "López", 2, "maria@example.com", 987654321);
+        usuario1 = new Usuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
+        usuario2 = new Usuario("María", "López", 2, "maria@example.com", "987654321");
         usuarios.put("1", usuario1);
         usuarios.put("2", usuario2);
 

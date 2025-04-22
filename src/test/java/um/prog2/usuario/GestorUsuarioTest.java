@@ -12,11 +12,11 @@ class GestorUsuarioTest {
         String apellido = "García";
         int id = 54321;
         String email = "ana.garcia@example.com";
-        int telefono = 123456789;
-        
+        String telefono = "123456789";
+
         // Act
         Usuario usuario = GestorUsuario.crearUsuario(nombre, apellido, id, email, telefono);
-        
+
         // Assert
         assertNotNull(usuario, "El usuario creado no debe ser nulo");
         assertEquals(nombre, usuario.getNombre(), "El nombre debe coincidir");

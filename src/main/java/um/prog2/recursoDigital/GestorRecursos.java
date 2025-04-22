@@ -7,6 +7,7 @@ import um.prog2.interfaces.Prestable;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.Renovable;
 import um.prog2.interfaces.ServicioNotificaciones;
+import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.usuario.Usuario;
 
 import java.util.ArrayList;
@@ -19,16 +20,19 @@ import java.util.List;
 public class GestorRecursos {
     private final List<RecursoDigital> recursos;
     private final ServicioNotificaciones servicioNotificaciones;
+    private final SistemaPrestamos sistemaPrestamos;
 
     /**
      * Constructor que inicializa el gestor de recursos.
      * 
      * @param recursos Lista de recursos a gestionar
      * @param servicioNotificaciones Servicio para enviar notificaciones a los usuarios
+     * @param sistemaPrestamos Sistema de préstamos para gestionar los préstamos
      */
-    public GestorRecursos(List<RecursoDigital> recursos, ServicioNotificaciones servicioNotificaciones) {
+    public GestorRecursos(List<RecursoDigital> recursos, ServicioNotificaciones servicioNotificaciones, SistemaPrestamos sistemaPrestamos) {
         this.recursos = recursos;
         this.servicioNotificaciones = servicioNotificaciones;
+        this.sistemaPrestamos = sistemaPrestamos;
     }
 
     /**
@@ -142,14 +146,8 @@ public class GestorRecursos {
             throw new RecursoNoDisponibleException("El recurso " + getTitulo(recurso) + " no es prestable");
         }
 
-        Prestable prestable = (Prestable) recurso;
-        prestable.prestar(usuario);
-
-        servicioNotificaciones.enviarNotificacion(
-                "Préstamo: " + recurso.getIdentificador() + " - " +
-                        getTitulo(recurso) + ". Devolución: " + prestable.getFechaDevolucion(),
-                usuario
-        );
+        // Usar SistemaPrestamos para gestionar el préstamo
+        sistemaPrestamos.solicitarPrestamo(usuario, recurso, 7); // 7 días por defecto
     }
 
     /**
@@ -168,14 +166,23 @@ public class GestorRecursos {
             throw new RecursoNoDisponibleException("El recurso " + getTitulo(recurso) + " no es renovable");
         }
 
-        Renovable renovable = (Renovable) recurso;
-        renovable.renovar();
+        // Obtener el ID del préstamo activo para este recurso
+        List<um.prog2.prestamos.Prestamo> prestamosActivos = sistemaPrestamos.obtenerPrestamosActivos(usuario);
+        String idPrestamo = null;
 
-        servicioNotificaciones.enviarNotificacion(
-                "Renovación: " + recurso.getIdentificador() + " - " +
-                        getTitulo(recurso) + ". Nueva devolución: " + renovable.getFechaDevolucion(),
-                usuario
-        );
+        for (um.prog2.prestamos.Prestamo prestamo : prestamosActivos) {
+            if (prestamo.getRecurso().getIdentificador().equals(recurso.getIdentificador())) {
+                idPrestamo = prestamo.getId();
+                break;
+            }
+        }
+
+        if (idPrestamo == null) {
+            throw new RecursoNoDisponibleException("No se encontró un préstamo activo para este recurso");
+        }
+
+        // Usar SistemaPrestamos para gestionar la renovación
+        sistemaPrestamos.solicitarRenovacion(idPrestamo, usuario, 7); // 7 días adicionales por defecto
     }
 
     /**
@@ -194,17 +201,23 @@ public class GestorRecursos {
             throw new RecursoNoDisponibleException("El recurso " + getTitulo(recurso) + " no es prestable");
         }
 
-        Prestable prestable = (Prestable) recurso;
-        boolean devuelto = prestable.devolver();
+        // Obtener el ID del préstamo activo para este recurso
+        List<um.prog2.prestamos.Prestamo> prestamosActivos = sistemaPrestamos.obtenerPrestamosActivos(usuario);
+        String idPrestamo = null;
 
-        if (devuelto) {
-            servicioNotificaciones.enviarNotificacion(
-                    "Devolución: " + recurso.getIdentificador() + " - " + getTitulo(recurso),
-                    usuario
-            );
-        } else {
-            throw new RecursoNoDisponibleException("No se pudo devolver el recurso " + getTitulo(recurso));
+        for (um.prog2.prestamos.Prestamo prestamo : prestamosActivos) {
+            if (prestamo.getRecurso().getIdentificador().equals(recurso.getIdentificador())) {
+                idPrestamo = prestamo.getId();
+                break;
+            }
         }
+
+        if (idPrestamo == null) {
+            throw new RecursoNoDisponibleException("No se encontró un préstamo activo para este recurso");
+        }
+
+        // Usar SistemaPrestamos para gestionar la devolución
+        sistemaPrestamos.solicitarDevolucion(idPrestamo, usuario);
     }
 
     /**

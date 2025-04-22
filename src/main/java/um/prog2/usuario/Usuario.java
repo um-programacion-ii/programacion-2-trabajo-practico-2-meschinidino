@@ -5,9 +5,9 @@ public class Usuario {
     private String apellido;
     private int ID;
     private String email;
-    private int telefono;
+    private String telefono;
 
-    public Usuario(String nombre, String apellido, int ID, String email, int telefono) {
+    public Usuario(String nombre, String apellido, int ID, String email, String telefono) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.ID = ID;
@@ -15,10 +15,10 @@ public class Usuario {
         this.telefono = telefono;
     }
 
-    public int getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
-    public void setTelefono(int telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
     public String getNombre() {

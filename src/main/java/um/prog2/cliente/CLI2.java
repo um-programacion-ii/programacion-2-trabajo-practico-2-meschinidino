@@ -58,9 +58,9 @@ public class CLI2 {
 
         // Inicializar gestores
         gestorUsuario = new GestorUsuarioConsola(scanner, usuarios, servicioNotificaciones);
-        gestorRecursos = new GestorRecursosConsola(scanner, recursos, servicioNotificaciones);
-        buscadorRecursos = new BuscadorRecursos(scanner, recursos);
         sistemaPrestamos = new SistemaPrestamos(servicioNotificaciones);
+        gestorRecursos = new GestorRecursosConsola(scanner, recursos, servicioNotificaciones, sistemaPrestamos);
+        buscadorRecursos = new BuscadorRecursos(scanner, recursos);
         gestorPrestamos = new GestorPrestamosConsola(scanner, sistemaPrestamos, recursos);
         gestorReservas = new GestorReservasConsola(servicioNotificaciones, sistemaPrestamos);
 
@@ -119,7 +119,7 @@ public class CLI2 {
         System.out.println("4. Gestión de reservas");
         System.out.println("5. Ver notificaciones");
         System.out.println("6. Reportes y estadísticas");
-        System.out.println("7. Ver recursos disponibles con reservas");
+        System.out.println("7. Ver recursos con reservas o préstamos");
         System.out.println("8. Salir");
         System.out.print("Seleccione una opción: ");
     }
@@ -260,20 +260,20 @@ public class CLI2 {
     }
 
     /**
-     * Muestra los recursos disponibles que tienen reservas activas.
+     * Muestra los recursos que tienen reservas activas o préstamos activos.
      */
     private static void verRecursosDisponiblesConReservas() {
-        System.out.println("\n===== RECURSOS DISPONIBLES CON RESERVAS =====");
+        System.out.println("\n===== RECURSOS CON RESERVAS O PRÉSTAMOS =====");
 
-        List<RecursoDigital> recursosDisponibles = alertaDisponibilidad.obtenerRecursosDisponiblesConReservas();
+        List<RecursoDigital> recursosConReservasOPrestamos = alertaDisponibilidad.obtenerRecursosDisponiblesConReservas();
 
-        if (recursosDisponibles.isEmpty()) {
-            System.out.println("No hay recursos disponibles con reservas activas.");
+        if (recursosConReservasOPrestamos.isEmpty()) {
+            System.out.println("No hay recursos con reservas o préstamos activos.");
             return;
         }
 
-        System.out.println("Los siguientes recursos están disponibles y tienen reservas activas:");
-        for (RecursoDigital recurso : recursosDisponibles) {
+        System.out.println("Los siguientes recursos tienen reservas o préstamos activos:");
+        for (RecursoDigital recurso : recursosConReservasOPrestamos) {
             System.out.println("- " + recurso.getIdentificador() + ": " + 
                               gestorRecursos.getGestorRecursos().getTitulo(recurso));
         }
@@ -335,7 +335,7 @@ public class CLI2 {
     // Método para cargar datos de prueba iniciales
     private static void cargarDatosDePrueba() {
         // Crear un usuario de ejemplo
-        Usuario usuario = GestorUsuario.crearUsuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
+        Usuario usuario = GestorUsuario.crearUsuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
         usuarios.put("1", usuario);
 
         // Crear algunos recursos de ejemplo

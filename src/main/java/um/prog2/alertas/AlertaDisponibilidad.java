@@ -148,27 +148,28 @@ public class AlertaDisponibilidad {
     }
 
     /**
-     * Obtiene una lista de recursos disponibles que tienen reservas activas.
+     * Obtiene una lista de recursos que tienen reservas activas o préstamos activos.
      * 
-     * @return Lista de recursos disponibles con reservas
+     * @return Lista de recursos con reservas o préstamos
      */
     public List<RecursoDigital> obtenerRecursosDisponiblesConReservas() {
-        List<RecursoDigital> recursosDisponibles = gestorRecursos.obtenerRecursosDisponiblesParaPrestamo();
         List<Reserva> reservasActivas = sistemaReservas.obtenerTodasLasReservasActivas();
         List<RecursoDigital> resultado = new ArrayList<>();
 
-        // Crear un conjunto de IDs de recursos reservados
-        Map<String, RecursoDigital> recursosReservados = new HashMap<>();
+        // Crear un conjunto de recursos con reservas
+        Map<String, RecursoDigital> recursosConReservasOPrestamos = new HashMap<>();
         for (Reserva reserva : reservasActivas) {
-            recursosReservados.put(reserva.getRecurso().getIdentificador(), reserva.getRecurso());
+            recursosConReservasOPrestamos.put(reserva.getRecurso().getIdentificador(), reserva.getRecurso());
         }
 
-        // Filtrar recursos disponibles que tienen reservas
-        for (RecursoDigital recurso : recursosDisponibles) {
-            if (recursosReservados.containsKey(recurso.getIdentificador())) {
-                resultado.add(recurso);
-            }
+        // Obtener préstamos activos
+        List<um.prog2.prestamos.Prestamo> prestamosActivos = sistemaPrestamos.obtenerTodosPrestamosActivos();
+        for (um.prog2.prestamos.Prestamo prestamo : prestamosActivos) {
+            recursosConReservasOPrestamos.put(prestamo.getRecurso().getIdentificador(), prestamo.getRecurso());
         }
+
+        // Agregar todos los recursos con reservas o préstamos al resultado
+        resultado.addAll(recursosConReservasOPrestamos.values());
 
         return resultado;
     }

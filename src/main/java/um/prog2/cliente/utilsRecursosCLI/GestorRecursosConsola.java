@@ -8,6 +8,7 @@ import um.prog2.interfaces.Prestable;
 import um.prog2.interfaces.RecursoDigital;
 import um.prog2.interfaces.Renovable;
 import um.prog2.interfaces.ServicioNotificaciones;
+import um.prog2.prestamos.SistemaPrestamos;
 import um.prog2.recursoDigital.*;
 import um.prog2.usuario.Usuario;
 
@@ -23,6 +24,7 @@ public class GestorRecursosConsola {
     private final Scanner scanner;
     private final List<RecursoDigital> recursos;
     private final ServicioNotificaciones servicioNotificaciones;
+    private final SistemaPrestamos sistemaPrestamos;
     private final GestorRecursos gestorRecursos;
 
     /**
@@ -31,12 +33,14 @@ public class GestorRecursosConsola {
      * @param scanner Scanner para leer la entrada del usuario
      * @param recursos Lista de recursos a gestionar
      * @param servicioNotificaciones Servicio para enviar notificaciones a los usuarios
+     * @param sistemaPrestamos Sistema de préstamos para gestionar los préstamos
      */
-    public GestorRecursosConsola(Scanner scanner, List<RecursoDigital> recursos, ServicioNotificaciones servicioNotificaciones) {
+    public GestorRecursosConsola(Scanner scanner, List<RecursoDigital> recursos, ServicioNotificaciones servicioNotificaciones, SistemaPrestamos sistemaPrestamos) {
         this.scanner = scanner;
         this.recursos = recursos;
         this.servicioNotificaciones = servicioNotificaciones;
-        this.gestorRecursos = new GestorRecursos(recursos, servicioNotificaciones);
+        this.sistemaPrestamos = sistemaPrestamos;
+        this.gestorRecursos = new GestorRecursos(recursos, servicioNotificaciones, sistemaPrestamos);
     }
 
     /**
@@ -251,8 +255,7 @@ public class GestorRecursosConsola {
                 try {
                     // Usar GestorRecursos para prestar el recurso
                     gestorRecursos.prestarRecurso(disponibles.get(index), usuarioActual);
-                    System.out.println("Recurso prestado hasta: " + 
-                            ((Prestable)disponibles.get(index)).getFechaDevolucion());
+                    System.out.println("Préstamo solicitado. El recurso estará disponible en unos momentos.");
                 } catch (RecursoNoDisponibleException e) {
                     System.out.println("Error: " + e.getMessage());
                 }
