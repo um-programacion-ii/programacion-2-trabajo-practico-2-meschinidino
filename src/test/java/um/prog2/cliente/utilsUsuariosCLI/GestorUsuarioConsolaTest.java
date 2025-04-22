@@ -61,7 +61,7 @@ class GestorUsuarioConsolaTest {
     @Test
     void testSeleccionarUsuarioConUsuarioExistente() {
         // Arrange
-        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
+        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
         usuarios.put("1", usuario);
         Scanner scanner = new Scanner(new ByteArrayInputStream("1\n".getBytes()));
         gestorUsuario = new GestorUsuarioConsola(scanner, usuarios, servicioNotificaciones);
@@ -96,7 +96,7 @@ class GestorUsuarioConsolaTest {
     @Test
     void testSeleccionarUsuarioCancelado() {
         // Arrange
-        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
+        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
         usuarios.put("1", usuario);
         Scanner scanner = new Scanner(new ByteArrayInputStream("\n".getBytes()));
         gestorUsuario = new GestorUsuarioConsola(scanner, usuarios, servicioNotificaciones);

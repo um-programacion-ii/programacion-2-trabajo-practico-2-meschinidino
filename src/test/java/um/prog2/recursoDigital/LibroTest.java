@@ -81,7 +81,7 @@ class LibroTest {
     void testPrestar() {
         // Arrange
         Libro libro = new Libro(EstadoRecurso.DISPONIBLE, "Autor", "Título", "L004", CategoriaRecurso.NO_FICCION);
-        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
+        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
 
         // Act
         libro.prestar(usuario);
@@ -100,7 +100,7 @@ class LibroTest {
     void testRenovar() {
         // Arrange
         Libro libro = new Libro(EstadoRecurso.DISPONIBLE, "Autor", "Título", "L005", CategoriaRecurso.NO_FICCION);
-        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", 123456789);
+        Usuario usuario = new Usuario("Juan", "Pérez", 1, "juan@example.com", "123456789");
         libro.prestar(usuario);
         LocalDateTime fechaOriginal = libro.getFechaDevolucion();
 

@@ -30,8 +30,8 @@ public class HistorialAlertasTest {
         servicioNotificaciones = new ServicioEnvioNotificaciones();
         historialAlertas = new HistorialAlertas(servicioNotificaciones);
 
-        usuario1 = new Usuario("Juan", "Pérez", 1001, "juan@example.com", 555111222);
-        usuario2 = new Usuario("María", "López", 1002, "maria@example.com", 555333444);
+        usuario1 = new Usuario("Juan", "Pérez", 1001, "juan@example.com", "555111222");
+        usuario2 = new Usuario("María", "López", 1002, "maria@example.com", "555333444");
 
         // Inicializar preferencias de los usuarios
         servicioNotificaciones.inicializarPreferenciasUsuario(usuario1);

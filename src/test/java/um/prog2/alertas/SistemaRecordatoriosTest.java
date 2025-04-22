@@ -24,7 +24,7 @@ public class SistemaRecordatoriosTest {
     void setUp() {
         servicioNotificaciones = new ServicioEnvioNotificaciones();
         sistemaRecordatorios = new SistemaRecordatorios(servicioNotificaciones);
-        usuario = new Usuario("Test", "User", 12345, "test@example.com", 555123456);
+        usuario = new Usuario("Test", "User", 12345, "test@example.com", "555123456");
 
         // Inicializar preferencias del usuario
         servicioNotificaciones.inicializarPreferenciasUsuario(usuario);

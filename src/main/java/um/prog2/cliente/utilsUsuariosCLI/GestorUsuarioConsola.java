@@ -41,14 +41,8 @@ public class GestorUsuarioConsola {
         System.out.print("Email: ");
         String email = scanner.nextLine();
 
-        int telefono;
-        try {
-            System.out.print("Teléfono: ");
-            telefono = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Error: El teléfono debe ser un número");
-            return null;
-        }
+        System.out.print("Teléfono: ");
+        String telefono = scanner.nextLine();
 
         Usuario nuevoUsuario = GestorUsuario.crearUsuario(nombre, apellido, id, email, telefono);
         usuarios.put(String.valueOf(id), nuevoUsuario);

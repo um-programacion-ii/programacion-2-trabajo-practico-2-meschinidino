@@ -30,7 +30,7 @@ class GestorReservasConsolaTest {
         originalOut = System.out;
         outputStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStream));
-        
+
         // Mock simple para ServicioNotificaciones
         servicioNotificaciones = new ServicioNotificaciones() {
             @Override
@@ -38,23 +38,23 @@ class GestorReservasConsolaTest {
                 // No hace nada en el test
             }
         };
-        
+
         // Crear SistemaPrestamos
         sistemaPrestamos = new SistemaPrestamos(servicioNotificaciones);
-        
+
         // Usuario de prueba
-        usuario = new Usuario("Test", "User", 1, "test@example.com", 123456789);
+        usuario = new Usuario("Test", "User", 1, "test@example.com", "123456789");
     }
-    
+
     @Test
     void testGetSistemaReservas() {
         // Arrange
         Scanner scanner = new Scanner(new ByteArrayInputStream("".getBytes()));
         gestorReservas = new GestorReservasConsola(servicioNotificaciones, sistemaPrestamos);
-        
+
         // Act
         SistemaReservas result = gestorReservas.getSistemaReservas();
-        
+
         // Assert
         assertNotNull(result, "getSistemaReservas debe retornar una instancia no nula");
     }
