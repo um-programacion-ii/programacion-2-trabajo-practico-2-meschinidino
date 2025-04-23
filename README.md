@@ -1,3 +1,4 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/tc38IXJF)
 # 📚 Trabajo Práctico: Sistema de Gestión de Biblioteca Digital (Java 21+)
 
 ## 📌 Objetivo General
@@ -5,7 +6,7 @@
 Desarrollar un sistema de gestión de biblioteca digital que implemente los cinco principios SOLID, programación orientada a objetos, y conceptos avanzados de Java. El sistema deberá manejar diferentes tipos de recursos digitales, préstamos, reservas, y notificaciones en tiempo real.
 
 ## 👨‍🎓 Información del Alumno
-- **Nombre y Apellido**: [Nombre y Apellido del Alumno]
+- **Nombre y Apellido**: Dino Meschini
 
 ## 📋 Requisitos Adicionales
 
@@ -34,6 +35,247 @@ La guía debe ser clara, concisa y permitir a cualquier usuario entender y proba
 - La organización de la información
 - La inclusión de ejemplos prácticos
 
+# Documentación del Sistema
+
+## 1. Cómo funciona el sistema
+
+### Descripción general de la arquitectura
+El Sistema de Gestión de Biblioteca Digital está diseñado siguiendo los principios SOLID y utilizando una arquitectura modular orientada a objetos. El sistema está estructurado en capas lógicas que separan las responsabilidades y facilitan la extensibilidad y mantenimiento del código.
+
+La arquitectura del sistema se compone de:
+- **Capa de presentación**: Interfaz de línea de comandos (CLI) que permite la interacción con el usuario.
+- **Capa de lógica de negocio**: Gestores y servicios que implementan la funcionalidad principal.
+- **Capa de modelo de datos**: Clases que representan las entidades del sistema.
+
+### Explicación de los componentes principales
+
+#### Recursos Digitales
+- **RecursoDigital (Interfaz)**: Define el contrato básico para todos los recursos.
+- **RecursoBase**: Clase abstracta que implementa funcionalidad común.
+- **Libro, Revista, AudioLibro**: Implementaciones concretas de recursos digitales.
+- **GestorRecursos**: Administra la colección de recursos, permitiendo agregar, buscar y listar.
+
+#### Usuarios
+- **Usuario**: Representa a los usuarios del sistema con sus atributos y comportamientos.
+- **GestorUsuarios**: Maneja el registro, búsqueda y gestión de usuarios.
+
+#### Préstamos y Reservas
+- **SistemaPrestamos**: Gestiona el proceso de préstamo y devolución de recursos.
+- **Prestamo**: Representa un préstamo individual con su información asociada.
+- **SistemaReservas**: Administra las reservas de recursos no disponibles.
+- **Reserva**: Representa una reserva individual con su información asociada.
+
+#### Alertas y Notificaciones
+- **AlertaVencimiento**: Monitorea fechas de devolución y genera alertas.
+- **AlertaDisponibilidad**: Notifica cuando un recurso reservado está disponible.
+- **SistemaRecordatorios**: Gestiona recordatorios automáticos.
+- **HistorialAlertas**: Mantiene un registro de todas las alertas generadas.
+- **ServicioNotificaciones (Interfaz)**: Define el contrato para enviar notificaciones.
+
+#### Reportes
+- **GestorReportes**: Genera informes y estadísticas sobre el uso del sistema.
+
+### Flujo de trabajo del sistema
+
+1. **Inicio del sistema**:
+    - La aplicación se inicia desde la clase `Main`, que lanza la interfaz de línea de comandos (CLI).
+    - Se inicializan los componentes principales: gestores de recursos, usuarios, préstamos y reservas.
+
+2. **Gestión de recursos**:
+    - Los recursos se pueden agregar, buscar, listar y categorizar.
+    - Cada recurso tiene un estado (disponible, prestado, reservado) que determina las operaciones posibles.
+
+3. **Gestión de usuarios**:
+    - Los usuarios se registran en el sistema con información básica.
+    - Se pueden buscar y gestionar usuarios existentes.
+
+4. **Proceso de préstamo**:
+    - Un usuario solicita un préstamo de un recurso disponible.
+    - El sistema verifica la disponibilidad y actualiza el estado del recurso.
+    - Se establece una fecha de devolución y se registra el préstamo.
+    - Se generan alertas automáticas para recordar la fecha de vencimiento.
+
+5. **Proceso de reserva**:
+    - Si un recurso no está disponible, un usuario puede reservarlo.
+    - El sistema mantiene una cola de reservas para cada recurso.
+    - Cuando el recurso se devuelve, se notifica al primer usuario en la cola.
+
+6. **Sistema de alertas**:
+    - Monitoreo continuo de fechas de vencimiento.
+    - Generación de alertas cuando un recurso reservado está disponible.
+    - Envío de notificaciones a los usuarios según sus preferencias.
+
+7. **Generación de reportes**:
+    - El sistema puede generar informes sobre recursos más prestados, usuarios más activos, etc.
+    - Los reportes se pueden visualizar en la consola.
+
+## 2. Cómo ponerlo en funcionamiento
+
+### Requisitos previos
+- Java Development Kit (JDK) 21 o superior
+- Apache Maven 3.6.0 o superior
+- Git (opcional, para clonar el repositorio)
+
+### Proceso de compilación
+1. **Clonar el repositorio** (si no lo has hecho ya):
+   ```bash
+   git clone https://github.com/um-programacion-ii/programacion-2-trabajo-practico-2-meschinidino
+   cd prog2tp2
+   ```
+
+2. **Compilar el proyecto con Maven**:
+   ```bash
+   mvn clean compile
+   ```
+
+3. **Empaquetar el proyecto**:
+   ```bash
+   mvn package
+   ```
+   Esto generará un archivo JAR ejecutable en el directorio `target/`.
+
+### Cómo ejecutar la aplicación
+1. **Ejecutar directamente con Maven**:
+   ```bash
+   mvn exec:java -Dexec.mainClass="um.prog2.Main"
+   ```
+
+2. **Ejecutar el archivo JAR generado**:
+   ```bash
+   java -jar target/prog2tp2-1.0-SNAPSHOT.jar
+   ```
+
+3. **Interactuar con la aplicación**:
+    - Una vez iniciada, la aplicación mostrará un menú de opciones en la consola.
+    - Sigue las instrucciones en pantalla para navegar por las diferentes funcionalidades.
+
+## 3. Cómo probar cada aspecto desarrollado
+
+### Gestión de Recursos
+
+#### Agregar un nuevo recurso
+1. Selecciona la opción "Gestión de Recursos" en el menú principal.
+2. Elige "Agregar nuevo recurso".
+3. Selecciona el tipo de recurso (Libro, Revista, AudioLibro).
+4. Ingresa la información solicitada (título, autor, identificador, categoría).
+5. Verifica que el recurso se haya agregado correctamente usando la opción "Listar recursos".
+
+#### Buscar recursos
+1. Selecciona la opción "Gestión de Recursos" en el menú principal.
+2. Elige "Buscar recursos".
+3. Ingresa un término de búsqueda (título, autor, categoría).
+4. Verifica que los resultados coincidan con el criterio de búsqueda.
+
+#### Listar recursos por categoría
+1. Selecciona la opción "Gestión de Recursos" en el menú principal.
+2. Elige "Listar recursos".
+3. Selecciona "Filtrar por categoría".
+4. Elige una categoría de la lista.
+5. Verifica que solo se muestren los recursos de esa categoría.
+
+### Gestión de Usuarios
+
+#### Registrar un nuevo usuario
+1. Selecciona la opción "Gestión de Usuarios" en el menú principal.
+2. Elige "Registrar nuevo usuario".
+3. Ingresa la información solicitada (nombre, apellido, ID, email, teléfono).
+4. Verifica que el usuario se haya registrado correctamente usando la opción "Buscar usuario".
+
+#### Buscar usuario
+1. Selecciona la opción "Gestión de Usuarios" en el menú principal.
+2. Elige "Buscar usuario".
+3. Ingresa el ID o nombre del usuario.
+4. Verifica que se muestre la información correcta del usuario.
+
+### Sistema de Préstamos
+
+#### Realizar un préstamo
+1. Selecciona la opción "Préstamos" en el menú principal.
+2. Elige "Realizar préstamo".
+3. Ingresa el ID del usuario y el identificador del recurso.
+4. Verifica que el estado del recurso cambie a "PRESTADO".
+5. Comprueba que se genere una fecha de devolución (14 días después).
+
+#### Devolver un recurso
+1. Selecciona la opción "Préstamos" en el menú principal.
+2. Elige "Devolver recurso".
+3. Ingresa el identificador del recurso a devolver.
+4. Verifica que el estado del recurso cambie a "DISPONIBLE".
+5. Si hay reservas para ese recurso, verifica que se notifique al primer usuario en la cola.
+
+#### Renovar un préstamo
+1. Selecciona la opción "Préstamos" en el menú principal.
+2. Elige "Renovar préstamo".
+3. Ingresa el identificador del recurso prestado.
+4. Verifica que la fecha de devolución se extienda por 7 días adicionales.
+
+### Sistema de Reservas
+
+#### Realizar una reserva
+1. Selecciona la opción "Reservas" en el menú principal.
+2. Elige "Realizar reserva".
+3. Ingresa el ID del usuario y el identificador del recurso (que debe estar prestado).
+4. Verifica que la reserva se registre correctamente.
+
+#### Consultar cola de reservas
+1. Selecciona la opción "Reservas" en el menú principal.
+2. Elige "Ver cola de reservas".
+3. Ingresa el identificador del recurso.
+4. Verifica que se muestre la lista de usuarios en la cola de reservas.
+
+### Sistema de Alertas
+
+#### Verificar alertas de vencimiento
+1. Realiza un préstamo con una fecha de vencimiento cercana.
+2. Selecciona la opción "Alertas" en el menú principal.
+3. Elige "Ver alertas de vencimiento".
+4. Verifica que se muestren las alertas para préstamos próximos a vencer.
+
+#### Verificar alertas de disponibilidad
+1. Realiza una reserva para un recurso prestado.
+2. Devuelve el recurso prestado.
+3. Selecciona la opción "Alertas" en el menú principal.
+4. Elige "Ver alertas de disponibilidad".
+5. Verifica que se muestre una alerta para el usuario que realizó la reserva.
+
+### Reportes
+
+#### Generar reporte de recursos más prestados
+1. Selecciona la opción "Reportes" en el menú principal.
+2. Elige "Recursos más prestados".
+3. Verifica que se muestre una lista ordenada de recursos según la frecuencia de préstamos.
+
+#### Generar reporte de usuarios más activos
+1. Selecciona la opción "Reportes" en el menú principal.
+2. Elige "Usuarios más activos".
+3. Verifica que se muestre una lista ordenada de usuarios según su actividad en el sistema.
+
+### Flujos de trabajo completos
+
+#### Flujo completo de préstamo y devolución
+1. Registra un nuevo usuario.
+2. Agrega un nuevo libro.
+3. Realiza un préstamo con ese usuario y libro.
+4. Verifica el estado del libro (PRESTADO).
+5. Devuelve el libro.
+6. Verifica que el estado del libro cambie a DISPONIBLE.
+
+#### Flujo completo de reserva y notificación
+1. Registra dos usuarios (Usuario A y Usuario B).
+2. Agrega un nuevo libro.
+3. Realiza un préstamo del libro al Usuario A.
+4. Realiza una reserva del libro para el Usuario B.
+5. Devuelve el libro (Usuario A).
+6. Verifica que se genere una alerta de disponibilidad para el Usuario B.
+7. Verifica que el Usuario B pueda realizar el préstamo del libro reservado.
+
+#### Flujo completo de alertas de vencimiento
+1. Registra un usuario.
+2. Agrega un nuevo libro.
+3. Realiza un préstamo con una fecha de vencimiento cercana.
+4. Verifica que se generen alertas de vencimiento.
+5. Renueva el préstamo.
+6. Verifica que la fecha de vencimiento se actualice y las alertas se ajusten.
 ### Prueba de Funcionalidades
 
 #### 1. Gestión de Recursos
@@ -391,3 +633,10 @@ El uso inadecuado de IA puede resultar en:
 ## 📝 Licencia
 
 Este trabajo es parte del curso de Programación Avanzada de Ingeniería en Informática. Uso educativo únicamente.
+
+
+## Uso de Inteligencia Artificial en este proyecto:
+- Los tests se agregaron utilizando Junie para manejar la integración de nuevas partes al proyecto sin que explote todo
+- Se utiliza Junie también para agregar el sistema de préstamos y reservas
+- Más info sobre Junie https://www.jetbrains.com/junie/
+- Con eso me quedé sin tokens (:
